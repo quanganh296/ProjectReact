@@ -1,0 +1,104 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+  padding: 20px;
+}
+
+.login-background {
+  position: fixed;
+  top: 62px;
+  left: 125px;
+  right:817px;
+  bottom: 255px;
+  width: 576px;
+  height: 384px;
+  background: url('/Auth/draw2.webp.png') no-repeat;
+}
+
+
+
+.login-form-wrapper {
+  padding: 10px;
+  border-radius: 8px;
+  width: 434px;
+  height:423px;
+  text-align: center;
+  margin-left: 856px;
+  margin-right: 128px;
+  margin-bottom: 237px;
+  margin-top:42px;
+}
+
+.login-form-wrapper h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #1890ff;
+}
+
+.or-divider {
+  text-align: start;
+  margin: 20px 0;
+  color: #666;
+}
+
+h3 {
+  text-align: start;
+}
+
+.link-register {
+  text-align: start;
+  font-weight: bold;;
+}
+
+.Login-Btn-submit{
+  top:10px;
+  width:130px;
+  height:48px;
+  margin-right:431px;
+}
+
+.ant-btn-primary {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.login-icon {
+  flex-direction: row;
+}
+
+.ant-btn-icon {
+  padding: 0px;
+  width: 30px;
+}
+
+.ant-btn-primary:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0px;
+  height:72px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 20px;
+  background: #1890ff;
+}
+
+.footer-text{
+  color: #ffffff;
+  margin-left:48px;
+}
+
+.footer-links{
+  display: flex;
+  justify-content: space-between;
+  gap:10px;
+  margin-right:28px;
+}

@@ -1,0 +1,40 @@
+.blog-header {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+     margin-top: 24px;
+    margin-bottom: 35px;
+  background-color: #fff;
+}
+
+.header-title {
+    display: flex;
+    flex-direction: row;
+   font-size: 18px;
+   margin-left: 24px;
+   color: #777;
+   
+}
+
+.Logo {
+    
+}
+
+.search-input {
+  display: flex;
+  position:absolute;
+  justify-content: center;
+  align-items: center;
+  margin-left: 372px;
+  margin-right:16px;
+  width: 1080px;
+  height:40px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.search-input:hover,
+.search-input:focus {
+  border-color: #1677ff;
+  box-shadow: 0 0 4px rgba(22, 119, 255, 0.3);
+}

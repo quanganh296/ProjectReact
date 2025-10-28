@@ -1,0 +1,70 @@
+.featured-card {
+  overflow: hidden;
+}
+
+.featured-img {
+  height: 268px;
+  width: 592px;
+}
+
+.homepage-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-left:150px;
+    margin-right: 320px;
+    width:1280px;
+    padding:0px;
+}
+
+.side-card {
+  overflow: hidden;
+}
+
+.side-img {
+  height: 120px;
+}
+
+.post-card {
+  overflow: hidden;
+}
+
+.post-img {
+  width:384px;
+  height: 240px;
+  
+}
+
+.ant-tabs {
+  margin-bottom: 20px;
+  
+}
+
+.ant-tabs-tab {
+    
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.ant-card {
+     width:384px;
+  border-radius: 0 !important;
+}
+.ant-card-cover img {
+ 
+  border-radius: 0 !important;
+}
+
+.ant-card-body{
+    width:592px;
+    height: 172px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  margin-bottom: 48px;
+}
+
