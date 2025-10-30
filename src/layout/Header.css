@@ -1,34 +1,34 @@
+/* src/layout/Header.css */
 .blog-header {
-    display: flex;
-    flex-direction: row;
-    position: relative;
-     margin-top: 24px;
-    margin-bottom: 35px;
+  display: flex;
+  max-width: 1920px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 1px;
+  margin-bottom: 0px;
+  padding: 20px 40px;
+  border-bottom: 0.2px solid #67676745;
   background-color: #fff;
 }
 
 .header-title {
-    display: flex;
-    flex-direction: row;
-   font-size: 18px;
-   margin-left: 24px;
-   color: #777;
-   
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 18px;
+  color: rgb(37, 44, 50);
 }
 
 .Logo {
-    
+  margin-bottom: 5px;
+  margin-right: 8px;
 }
 
 .search-input {
-  display: flex;
-  position:absolute;
-  justify-content: center;
-  align-items: center;
-  margin-left: 372px;
-  margin-right:16px;
-  width: 1080px;
-  height:40px;
+  width: 920px;
+  height: 40px;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
@@ -37,4 +37,16 @@
 .search-input:focus {
   border-color: #1677ff;
   box-shadow: 0 0 4px rgba(22, 119, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .blog-header {
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+  }
+  .search-input {
+    width: 100%;
+  }
 }

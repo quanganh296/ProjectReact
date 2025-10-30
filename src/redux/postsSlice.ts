@@ -22,8 +22,8 @@ const initialState: PostsState = {
       date: "2025-02-25",
       category: "Daily Journal",
       excerpt:
-        "Today was a really productive day at work. I managed to finish a report ahead of schedule...",
-      image: "/Auth/Image.png",
+        "Today was a really productive day at work. I managed to finish a report ahead of schedule and received positive feedback from my manager.",
+      image: "/Auth/Image (6).png",
     },
     {
       id: 2,
@@ -31,7 +31,7 @@ const initialState: PostsState = {
       date: "2025-02-24",
       category: "Work & Career",
       excerpt:
-        "I had my first job interview today! I was nervous at first, but as the conversation went on...",
+        "I had my first job interview today! I was nervous at first, but as the conversation went on, I felt more confident. ",
       image: "/Auth/Image (1).png",
     },
     {
@@ -54,12 +54,12 @@ const initialState: PostsState = {
     },
      {
       id: 5,
-      title: "How Collaboration Makes Us Better Designers",
+      title: "Our top 10 Javascript frameworks to use",
       date: "2025-02-21",
-      category: "Emotions & Feelings",
+      category: "Work & Career",
       excerpt:
-        "We learn more and build stronger teams through collaboration.",
-      image: "/Auth/Image (3).png",
+        "JavaScript frameworks make development easy with extensive features and functionalities.",
+      image: "/Auth/Image (4).png",
     },
      {
       id: 6,
