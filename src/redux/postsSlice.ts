@@ -8,6 +8,9 @@ interface Post {
   category: string;
   excerpt: string;
   image: string;
+  isMine: boolean;
+  mood?: string; 
+  status?: "public" | "private";
 }
 
 interface PostsState {
@@ -24,6 +27,8 @@ const initialState: PostsState = {
       excerpt:
         "Today was a really productive day at work. I managed to finish a report ahead of schedule and received positive feedback from my manager.",
       image: "/Auth/Image (6).png",
+      isMine: true,
+      mood: "happy",
     },
     {
       id: 2,
@@ -33,6 +38,8 @@ const initialState: PostsState = {
       excerpt:
         "I had my first job interview today! I was nervous at first, but as the conversation went on, I felt more confident. ",
       image: "/Auth/Image (1).png",
+      isMine: true,
+      mood: "happy",
     },
     {
       id: 3,
@@ -42,6 +49,8 @@ const initialState: PostsState = {
       excerpt:
         "Lately, I have been overthinking everything, from small decisions to bigger life choices.",
       image: "/Auth/Image (2).png",
+      isMine: true,
+      mood: "happy",
     },
     {
       id: 4,
@@ -51,6 +60,8 @@ const initialState: PostsState = {
       excerpt:
         "We learn more and build stronger teams through collaboration.",
       image: "/Auth/Image (3).png",
+      isMine: false,
+      mood: "happy",
     },
      {
       id: 5,
@@ -60,6 +71,8 @@ const initialState: PostsState = {
       excerpt:
         "JavaScript frameworks make development easy with extensive features and functionalities.",
       image: "/Auth/Image (4).png",
+      isMine: false,
+      mood: "happy",
     },
      {
       id: 6,
@@ -69,6 +82,8 @@ const initialState: PostsState = {
       excerpt:
         "Starting a community doesn’t need to be complicated, but how do you get started?",
       image: "/Auth/Image (5).png",
+      isMine: true,
+      mood: "happy",
     },
   ],
 };

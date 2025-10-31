@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
+import { Typography } from 'antd';
+import { Link } from 'react-router-dom';
 import './Signup.css';
+
+const { Text } = Typography;
 
 const Signup: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -107,9 +111,9 @@ const Signup: React.FC = () => {
         </div>
 
         <button type="submit" className="signup-btn">Sign Up</button>
-        <p className="login-text">
-          Already have an account? <a href="/">Login</a>
-        </p>
+        <div className = "Signin-link">
+        <Text >Already have an account? <Link style={{ textDecoration: 'underline', color: '#ff4d4f' }} to="/login">Login</Link></Text>
+        </div>
         
       </form>
     </div>
