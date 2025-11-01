@@ -19,47 +19,55 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  // ✅ Tạo user mẫu nếu chưa có trong localStorage
+  React.useEffect(() => {
+    const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
+
+    if (existingUsers.length === 0) {
+      const defaultUsers: User[] = [
+        {
+          name: "Admin",
+          email: "admin@gmail.com",
+          avatarUrl: "https://via.placeholder.com/40",
+          role: "admin",
+          password: "admin123",
+        },
+        {
+          name: "Nguyen Quang Anh",
+          email: "user@gmail.com",
+          avatarUrl: "https://via.placeholder.com/40",
+          role: "user",
+          password: "123456",
+        },
+      ];
+
+      localStorage.setItem("users", JSON.stringify(defaultUsers));
+    }
+  }, []);
+
   const onFinish = (values: { email: string; password: string }) => {
-  // Mock users list — TẠO TÀI KHOẢN ADMIN & USER
-  const mockUsers: User[] = [
-    {
-      name: "Admin",
-      email: "admin@gmail.com",
-      avatarUrl: "https://via.placeholder.com/40",
-      role: "admin",
-      password: "admin123",
-    },
-    {
-      name: "Nguyen Quang Anh",
-      email: "user@gmail.com",
-      avatarUrl: "https://via.placeholder.com/40",
-      role: "user",
-      password: "123456",
-    },
-  ];
+    const users: User[] = JSON.parse(localStorage.getItem("users") || "[]");
 
-  // Tìm user dựa trên email + password nhập vào
-  const foundUser = mockUsers.find(
-    (u) => u.email === values.email && u.password === values.password
-  );
+    const foundUser = users.find(
+      (u) => u.email === values.email && u.password === values.password
+    );
 
-  if (!foundUser) {
-    message.error("Email or password is incorrect!");
-    return;
-  }
+    if (!foundUser) {
+      message.error("Email or password is incorrect!");
+      return;
+    }
 
-  // Lưu thông tin user vào localStorage (Auth Context)
-  login(foundUser);
-  message.success("Login successful!");
+    // ✅ Lưu user login vào Auth Context + localStorage
+    login(foundUser);
+    message.success("Login successful!");
 
-  // Nếu user là admin → về trang admin
-  if (foundUser.role === "admin") {
-    navigate("/admin");
-  } else {
-    navigate("/home");
-  }
-};
-
+    // ✅ Điều hướng theo role
+    if (foundUser.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/home");
+    }
+  };
 
   const onFinishFailed = (errorInfo: unknown) => {
     console.log("Login Failed:", errorInfo);
@@ -68,12 +76,9 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-container">
-      {/* Background */}
       <div className="login-background"></div>
 
-      {/* Form */}
       <div className="login-form-wrapper">
-        {/* Social Login */}
         <Space className="login-icon" size="middle" style={{ width: "100%", justifyContent: "center" }}>
           <Text>Sign in with</Text>
           <Button type="text" size="small" icon={<FontAwesomeIcon icon={faFacebookF} />} />
@@ -83,7 +88,6 @@ const Login: React.FC = () => {
 
         <div className="or-divider">or</div>
 
-        {/* Login Form */}
         <Form
           form={form}
           name="login"
@@ -118,7 +122,6 @@ const Login: React.FC = () => {
           </Form.Item>
         </Form>
 
-        {/* Register Link */}
         <div className="link-register" style={{ textAlign: "center" }}>
           <Text>
             Don't have an account?{" "}
@@ -129,7 +132,6 @@ const Login: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="footer">
         <div className="footer-text">
           <p>Copyright © 2025 All rights reserved</p>

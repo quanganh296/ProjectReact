@@ -1,3 +1,4 @@
+// src/pages/user/AddArticle.tsx
 import React, { useState, useEffect } from "react";
 import {
   Form,
@@ -9,14 +10,14 @@ import {
   message,
   Typography,
 } from "antd";
-import { UploadOutlined, SmileOutlined, FrownOutlined, MehOutlined } from "@ant-design/icons";
+import { UploadOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../../context/useAuth";
 import Header from "../../components/Header";
 import "../../styles/AddArticle.css";
-import { type UploadFile, type UploadProps } from "antd";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../redux/store";
+import { setPosts } from "../../redux/postsSlice";
+import type { UploadFile } from "antd"; // Chỉ cần UploadFile
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -32,15 +33,14 @@ interface ArticleFormValues {
 const AddArticle: React.FC = () => {
   const [form] = Form.useForm<ArticleFormValues>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { id } = useParams<{ id?: string }>();
   const isEdit = Boolean(id);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
-  // LẤY DANH SÁCH BÀI VIẾT TỪ REDUX
+  const dispatch = useDispatch();
   const posts = useSelector((state: RootState) => state.posts.posts);
+  const categories = useSelector((state: RootState) => state.categories.categories);
 
-  // NẾU LÀ EDIT → LOAD DỮ LIỆU CŨ
   useEffect(() => {
     if (isEdit && id) {
       const post = posts.find((p) => p.id === Number(id));
@@ -52,7 +52,6 @@ const AddArticle: React.FC = () => {
           content: post.excerpt,
           status: post.status || "public",
         });
-        // Nếu có ảnh → giả lập fileList
         if (post.image) {
           setFileList([
             {
@@ -65,127 +64,128 @@ const AddArticle: React.FC = () => {
         }
       }
     }
-  }, [id, isEdit, posts, form]);
+  }, [id, isEdit, form, posts]);
 
   const onFinish = (values: ArticleFormValues) => {
-    const articleData = {
-      ...values,
-      author: user?.name || "Anonymous",
-      image: fileList[0]?.name || null,
+    const newPost = {
+      id: isEdit ? Number(id) : Date.now(),
+      title: values.title,
+      category: values.category,
+      mood: values.mood,
+      excerpt: values.content,
+      image: fileList[0]?.url || "/default-image.png",
+      date: new Date().toISOString().split("T")[0],
+      isMine: true,
+      status: values.status,
     };
 
+    let updatedPosts;
     if (isEdit) {
-      console.log("UPDATE article ID:", id, articleData);
-      message.success("Article updated successfully!");
+      updatedPosts = posts.map((p) => (p.id === Number(id) ? { ...p, ...newPost } : p));
     } else {
-      console.log("CREATE article:", articleData);
-      message.success("Article created successfully!");
+      updatedPosts = [...posts, newPost];
     }
 
-    navigate("/"); // Về Home
+    dispatch(setPosts(updatedPosts));
+    message.success(isEdit ? "Cập nhật thành công!" : "Thêm bài viết thành công!");
+    navigate("/home", { state: { resetToAllBlogs: true } });
   };
 
-  const uploadProps: UploadProps = {
-    onRemove: (file) => {
-      setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
-    },
-    beforeUpload: (file) => {
-      setFileList([file]);
-      return false;
-    },
+  const uploadProps = {
     fileList,
-    maxCount: 1,
+    onRemove: () => setFileList([]),
+    beforeUpload: (file: File) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFileList([
+          {
+            uid: "-1",
+            name: file.name,
+            status: "done",
+            url: e.target?.result as string,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+      return false; // Ngăn upload thật
+    },
   };
 
   return (
     <>
       <Header />
       <div className="add-article-container">
+        <Title level={2} className="text-center mb-6">
+          {isEdit ? "Chỉnh sửa bài viết" : "Viết bài mới"}
+        </Title>
         <div className="add-article-form">
-          <Title level={3} style={{ textAlign: "center", marginBottom: 32 }}>
-            {isEdit ? "Edit Article" : "Add New Article"}
-          </Title>
-
           <Form form={form} layout="vertical" onFinish={onFinish}>
             {/* TITLE */}
             <Form.Item
-              label="Title"
+              label="Tiêu đề"
               name="title"
-              rules={[{ required: true, message: "Please enter title!" }]}
+              rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
             >
-              <Input placeholder="Enter article title" />
+              <Input placeholder="Nhập tiêu đề bài viết" />
             </Form.Item>
 
             {/* CATEGORY */}
             <Form.Item
-              label="Article Categories"
+              label="Chủ đề"
               name="category"
-              rules={[{ required: true, message: "Please select category!" }]}
+              rules={[{ required: true, message: "Vui lòng chọn chủ đề!" }]}
             >
-              <Select placeholder="Select a category">
-                <Select.Option value="Daily Journal">Daily Journal</Select.Option>
-                <Select.Option value="Work & Career">Work & Career</Select.Option>
-                <Select.Option value="Personal Thoughts">Personal Thoughts</Select.Option>
-                <Select.Option value="Emotions & Feelings">Emotions & Feelings</Select.Option>
+              <Select placeholder="Chọn chủ đề">
+                {categories.map((cat) => (
+                  <Select.Option key={cat.id} value={cat.name}>
+                    {cat.name}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
 
             {/* MOOD */}
             <Form.Item
-              label="Mood"
+              label="Tâm trạng"
               name="mood"
-              rules={[{ required: true, message: "Please select mood!" }]}
+              rules={[{ required: true, message: "Vui lòng chọn tâm trạng!" }]}
             >
-              <Select placeholder="How are you feeling?">
-                <Select.Option value="happy">
-                  <SmileOutlined style={{ color: "#52c41a", marginRight: 8 }} />
-                  Happy
-                </Select.Option>
-                <Select.Option value="excited">
-                  <SmileOutlined style={{ color: "#faad14", marginRight: 8 }} />
-                  Excited
-                </Select.Option>
-                <Select.Option value="calm">
-                  <MehOutlined style={{ color: "#1890ff", marginRight: 8 }} />
-                  Calm
-                </Select.Option>
-                <Select.Option value="tired">
-                  <FrownOutlined style={{ color: "#f5222d", marginRight: 8 }} />
-                  Tired
-                </Select.Option>
+              <Select placeholder="Bạn đang cảm thấy thế nào?">
+                <Select.Option value="happy">Happy</Select.Option>
+                <Select.Option value="excited">Excited</Select.Option>
+                <Select.Option value="calm">Calm</Select.Option>
+                <Select.Option value="tired">Tired</Select.Option>
               </Select>
             </Form.Item>
 
             {/* CONTENT */}
             <Form.Item
-              label="Content"
+              label="Nội dung"
               name="content"
-              rules={[{ required: true, message: "Please write content!" }]}
+              rules={[{ required: true, message: "Vui lòng viết nội dung!" }]}
             >
-              <TextArea rows={6} placeholder="Write your article here..." />
+              <TextArea rows={6} placeholder="Viết bài của bạn tại đây..." />
             </Form.Item>
 
             {/* STATUS */}
-            <Form.Item label="Status" name="status" initialValue="public">
+            <Form.Item label="Trạng thái" name="status" initialValue="public">
               <Radio.Group>
-                <Radio value="public">Public</Radio>
-                <Radio value="private">Private</Radio>
+                <Radio value="public">Công khai</Radio>
+                <Radio value="private">Riêng tư</Radio>
               </Radio.Group>
             </Form.Item>
 
             {/* UPLOAD IMAGE */}
-            <Form.Item label="Upload Image">
-              <Upload {...uploadProps}>
-                <Button icon={<UploadOutlined />}>
-                  Browse and choose the file
-                </Button>
+            <Form.Item label="Hình ảnh">
+              <Upload {...uploadProps} listType="picture">
+                <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
               </Upload>
             </Form.Item>
 
             {/* SUBMIT */}
             <Form.Item>
               <Button type="primary" htmlType="submit" block size="large">
-                {isEdit ? "Update" : "Add"}
+                {isEdit ? "Cập nhật" : "Đăng bài"}
               </Button>
             </Form.Item>
           </Form>

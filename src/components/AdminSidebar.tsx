@@ -1,70 +1,85 @@
-import React from "react";
-import { Menu, Button } from "antd";
-import { 
-  UserOutlined, 
-  FileTextOutlined, 
-  EditOutlined, 
-  LogoutOutlined 
-} from "@ant-design/icons";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
+// // src/layout/AdminLayout.tsx
+// import React from "react";
+// import { Layout, Menu } from "antd";
+// import {
+//   UserOutlined,
+//   FileTextOutlined,
+//   AppstoreOutlined,
+//   LogoutOutlined,
+// } from "@ant-design/icons";
+// import { Link, useNavigate, useLocation } from "react-router-dom";
+// import { useAuth } from "../context/useAuth";
+// import Header from "../components/Header";
 
-const AdminSidebar = () => {
-  const { logout } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+// const { Sider, Content } = Layout;
 
-  const menuItems = [
-    {
-      key: "/admin/users",
-      icon: <UserOutlined />,
-      label: <Link to="/admin/users">Manage users</Link>,
-    },
-    {
-      key: "/admin/entries",
-      icon: <FileTextOutlined />,
-      label: <Link to="/admin/entries">Manage entries</Link>,
-    },
-    {
-      key: "/admin/articles",
-      icon: <EditOutlined />,
-      label: <Link to="/admin/articles">Manage articles</Link>,
-    },
-  ];
+// const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+//   const { logout } = useAuth();
+//   const navigate = useNavigate();
+//   const location = useLocation(); // LẤY ĐƯỜNG DẪN HIỆN TẠI
 
-  return (
-    <div className="h-full flex flex-col">
-      {/* Logo */}
-      <div className="p-6 border-b">
-        <h2 className="text-xl font-bold text-gray-800">RIKKEI EDUCATION</h2>
-      </div>
+//   const handleLogout = () => {
+//     logout();
+//     navigate("/login");
+//   };
 
-      {/* Menu */}
-      <Menu
-        mode="inline"
-        selectedKeys={[location.pathname]}
-        items={menuItems}
-        className="flex-1 border-none"
-        style={{ background: "transparent" }}
-      />
+//   // XÁC ĐỊNH KEY HIỆN TẠI DỰA VÀO PATHNAME
+//   const getSelectedKey = () => {
+//     const path = location.pathname;
+//     if (path.includes("/admin/users")) return "users";
+//     if (path.includes("/admin/entries")) return "entries";
+//     if (path.includes("/admin/articles")) return "articles";
+//     return "users"; // mặc định
+//   };
 
-      {/* Logout */}
-      <div className=" log-out p-1 border-t ">
-        <Button
-          block
-          type="text"
-          icon={<LogoutOutlined />}
-          onClick={() => {
-            logout();
-            navigate("/login");
-          }}
-          className=" hover:text-red-500"
-        >
-          Log out
-        </Button>
-      </div>
-    </div>
-  );
-};
+//   const menuItems = [
+//     {
+//       key: "users",
+//       icon: <UserOutlined />,
+//       label: <Link to="/admin/users">Quản lý người dùng</Link>,
+//     },
+//     {
+//       key: "entries",
+//       icon: <AppstoreOutlined />,
+//       label: <Link to="/admin/entries">Quản lý chủ đề</Link>,
+//     },
+//     {
+//       key: "articles",
+//       icon: <FileTextOutlined />,
+//       label: <Link to="/admin/articles">Quản lý bài viết</Link>,
+//     },
+//     {
+//       key: "logout",
+//       icon: <LogoutOutlined />,
+//       label: <span onClick={handleLogout}>Đăng xuất</span>,
+//     },
+//   ];
 
-export default AdminSidebar;
+//   return (
+//     <Layout style={{ minHeight: "100vh" }}>
+//       {/* Sidebar trái */}
+//       <Sider width={240} >
+        
+//         <Menu
+//           mode="inline"
+//           selectedKeys={[getSelectedKey()]} 
+//           style={{ height: "100%", borderRight: 0 }}
+//           theme="dark"
+//           items={menuItems}
+//         />
+//       </Sider>
+
+//       {/* Nội dung chính */}
+//       <Layout>
+//         <Header />
+//         <Content >
+//           <div >
+//             {children}
+//           </div>
+//         </Content>
+//       </Layout>
+//     </Layout>
+//   );
+// };
+
+// export default AdminLayout;

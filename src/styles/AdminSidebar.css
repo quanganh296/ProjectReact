@@ -32,4 +32,22 @@
     justify-content: flex-start !important;
     align-items: flex-start !important;
     text-align: start !important;
+    
+}
+.log-out:hover {
+    transition: 0.5s ease;
+    background-color: rgba(236, 99, 99, 0.826);
+}
+
+.category-table .ant-table-thead > tr > th {
+  background: #fafafa !important;
+  font-weight: 600;
+}
+
+.category-table .ant-table-tbody > tr:hover > td {
+  background: #f9f9f9;
+}
+
+.category-table .ant-input {
+  border-radius: 6px;
 }

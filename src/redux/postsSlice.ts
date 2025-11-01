@@ -4,13 +4,14 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 interface Post {
   id: number;
   title: string;
-  date: string;
-  category: string;
   excerpt: string;
   image: string;
-  isMine: boolean;
-  mood?: string; 
+  date: string;
+  category: string;
+  mood?: string;
+  isMine?: boolean;
   status?: "public" | "private";
+  author?: string;
 }
 
 interface PostsState {

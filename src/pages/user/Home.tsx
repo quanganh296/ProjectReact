@@ -1,27 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store";
-import {
-  Row,
-  Col,
-  Pagination,
-  Tag,
-  Space,
-  Typography,
-  Button,
-} from "antd";
-import { RightOutlined } from "@ant-design/icons";
+import { Row, Col, Pagination } from "antd";
 import Header from "../../components/Header";
+import FilterSidebar from "../../components/FilterSidebar";
+import PostCard from "../../components/PostCard";
+import Footer from "../../components/Footer";
 import "../../styles/Home.css";
 import "../../styles/PostCard.css";
 import "../../styles/Footer.css";
-import { getCategoryColor } from "../../utils/categoryColor";
 import { useAuth } from "../../context/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
+import { getCategoryColor } from "../../utils/categoryColor";
 
-const { Title, Text } = Typography;
-
-// Định nghĩa type cho Post
 interface Post {
   id: number;
   title: string;
@@ -30,48 +21,51 @@ interface Post {
   category: string;
   image: string;
   isMine?: boolean;
+  status?: "public" | "private";
 }
-
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const location = useLocation();
   const posts = useSelector((state: RootState) => state.posts.posts);
+
   const shouldReset = Boolean(location.state?.resetToAllBlogs);
-   const [selectedView, setSelectedView] = useState(() => {
-    return shouldReset ? "All blog posts" : "All blog posts";
-  });
+  const [selectedView, setSelectedView] = useState(() =>
+    shouldReset ? "All blog posts" : "All blog posts"
+  );
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  
-
   const postsPerPage = 6;
-
-
- 
 
   React.useEffect(() => {
     if (shouldReset) {
       setSelectedView("All blog posts");
       setSelectedCategory("All");
       setCurrentPage(1);
-      // Xóa state để tránh reset lại lần sau
       window.history.replaceState({}, "");
     }
   }, [shouldReset]);
 
-  // Lọc bài viết theo user
-  const userPosts = posts.filter((p: Post) => p.isMine);
+  const filteredPosts = useMemo(() => {
+    let result = posts;
 
-  let filteredPosts: Post[] =
-    selectedView === "All my posts" ? userPosts : posts;
+    if (selectedView === "All my posts" && isAuthenticated) {
+      result = result.filter((p: Post) => p.isMine);
+    }
 
-  if (selectedCategory !== "All") {
-    filteredPosts = filteredPosts.filter(
-      (p: Post) => p.category === selectedCategory
-    );
-  }
+    if (selectedCategory !== "All") {
+      result = result.filter((p: Post) => p.category === selectedCategory);
+    }
+
+    if (!isAuthenticated || !user) {
+      result = result.filter((p: Post) => p.status !== "private");
+    } else {
+      result = result.filter((p: Post) => p.status !== "private" || p.isMine);
+    }
+
+    return result;
+  }, [posts, selectedView, selectedCategory, isAuthenticated, user]);
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
@@ -80,7 +74,6 @@ const HomePage: React.FC = () => {
   const handleViewChange = (view: string) => {
     setSelectedView(view);
     setCurrentPage(1);
-    setSelectedCategory("All");
   };
 
   const handleCategoryChange = (category: string) => {
@@ -88,215 +81,96 @@ const HomePage: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const featuredPost =
-    selectedView === "All blog posts" ? filteredPosts[0] : null;
-  const sidePosts =
-    selectedView === "All blog posts" ? filteredPosts.slice(1, 3) : [];
-
   return (
     <>
       <Header />
-
       <div className="homepage-container">
-        {/* === PHẦN RECENT BLOG POSTS - CHỈ HIỆN KHI "All blog posts" === */}
-        {selectedView === "All blog posts" && (
-          <div className="featured-section">
-            <h4 className="fw-bold mb-2">Recent blog posts</h4>
-            <Row gutter={[16, 16]} align="stretch">
-              {featuredPost && (
-                <Col xs={24} lg={12}>
-                  <div className="main-post">
-                    <img
-                      src="/Auth/Image.png"
-                      alt={featuredPost.title}
-                      className="main-post-img"
-                    />
-                    <div className="main-post-content">
-                      <Text type="secondary" className="post-date">
-                        Date: {featuredPost.date}
-                      </Text>
-                      <Title level={4} className="main-post-title">
-                        {featuredPost.title}
-                      </Title>
-                      <div className ="main-post-footer">
-                      <Text className="main-post-excerpt">
-                        {featuredPost.excerpt}
-                      </Text>
-                      <Tag
-                        className="compact-tag-main"
-                        color={getCategoryColor(featuredPost.category)}
-                      >
-                        {featuredPost.category}
-                      </Tag>
-                      </div>
-                    </div>
-                  </div>
-                </Col>
-              )}
+       
 
-              <Col xs={24} lg={12}>
-                <div className="side-posts-container">
-                  {sidePosts.map((p: Post) => (
-                    <div key={p.id} className="side-post-card">
-                      <img src={p.image} alt={p.title} className="side-post-img" />
-                      <div className="side-post-content">
-                        <Text type="secondary" className="post-date">
-                          Date: {p.date}
-                        </Text>
-                        <Title level={5} className="side-post-title">
-                          {p.title}
-                        </Title>
-                        <Text className="side-post-excerpt">{p.excerpt}</Text>
-                        <Tag
-                          className="compact-tag-side"
-                          color={getCategoryColor(p.category)}
-                        >
-                          {p.category}
-                        </Tag>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Col>
-            </Row>
+        <h2 style={{ maxWidth: "1280px", margin: "40px auto 20px", padding: "0 20px" }}>
+          Recent posts
+        </h2>
+
+        {filteredPosts.length > 0 && (
+          <div
+            className="featured-section"
+            style={{ display: "flex", gap: "20px", maxWidth: "1280px", margin: "0 auto" }}
+          >
+            {/* Main Post */}
+            {currentPosts[0] && (
+              <PostCard
+                id={currentPosts[0].id}
+                title={currentPosts[0].title}
+                date={currentPosts[0].date}
+                category={currentPosts[0].category}
+                excerpt={currentPosts[0].excerpt}
+                image="/Auth/Image.png"
+                isMine={currentPosts[0].isMine}
+                onEdit={() => navigate(`/add-article/${currentPosts[0].id}`)}
+                onTitleClick={() => navigate(`/article/${currentPosts[0].id}`)}
+                categoryColor={getCategoryColor(currentPosts[0].category)}
+              />
+            )}
+
+            {/* Side Posts */}
+           <div className="side-posts-container">
+  {currentPosts.slice(1, 3).map((post) => (
+    <div key={post.id} className="side-post-card">
+      <img
+        src={post.image}
+        alt={post.title}
+        className="side-post-img"
+      />
+      <div className="side-post-content">
+        <h4 className="side-post-title">{post.title}</h4>
+        <p className="post-date">{post.date}</p>
+        <p className="side-post-excerpt">{post.excerpt}</p>
+        <a href="#" className="post-category" style={{ color: getCategoryColor(post.category) }}>
+          {post.category}
+        </a>
+      </div>
+    </div>
+  ))}
+</div>
           </div>
         )}
 
-        {/* === PHẦN DANH SÁCH BÀI VIẾT === */}
+         <FilterSidebar
+          selectedView={selectedView}
+          selectedCategory={selectedCategory}
+          onViewChange={handleViewChange}
+          onCategoryChange={handleCategoryChange}
+        />
+
+        {/* List posts */}
         <div className="posts-section-card">
           <div className="posts-section-inner">
-            {/* Tiêu đề động */}
-            <div className="section-title-wrapper" style={{ textAlign: "center", margin: "24px 0" }}>
-              {selectedView === "All my posts" ? (
-                <div style={{ textAlign: "center" }}>
-                 <Button
-      type="primary"
-      size="large"
-      onClick={() => navigate("/add-article")}
-    >
-      Add New Article
-    </Button>
-                </div>
-              ) : (
-                <div className="view-tabs">
-                  <Space size={24}>
-                    <span
-                      className={`view-tab ${
-                        selectedView === "All blog posts" ? "active" : ""
-                      }`}
-                      onClick={() => handleViewChange("All blog posts")}
-                    >
-                      All blog posts
-                    </span>
-                    {isAuthenticated && (
-                      <span
-                        className={`view-tab ${
-                          selectedView === "All my posts" ? "active" : ""
-                        }`}
-                        onClick={() => handleViewChange("All my posts")}
-                      >
-                        All my posts
-                      </span>
-                    )}
-                  </Space>
-                </div>
-              )}
-            </div>
+            <Row gutter={[24, 24]}>
+              {currentPosts.map((post) => (
+                <Col key={post.id} xs={24} sm={12} lg={8}>
+                  <PostCard
+                    id={post.id}
+                    title={post.title}
+                    date={post.date}
+                    category={post.category}
+                    excerpt={post.excerpt}
+                    image={post.image}
+                    isMine={post.isMine}
+                    onEdit={() => navigate(`/add-article/${post.id}`)}
+                    onTitleClick={() => navigate(`/article/${post.id}`)}
+                    categoryColor={getCategoryColor(post.category)}
+                  />
+                </Col>
+              ))}
+            </Row>
 
-            {/* Category filter - chỉ hiện ở All blog posts */}
-            {selectedView === "All blog posts" && (
-              <div className="category-links" style={{ marginBottom: 24 }}>
-                <Space size={20}>
-                  {[
-                    "All",
-                    "Daily Journal",
-                    "Work & Career",
-                    "Personal Thoughts",
-                    "Emotions & Feelings",
-                  ].map((cat) => (
-                    <span
-                      key={cat}
-                      className={`category-link ${
-                        selectedCategory === cat ? "active" : ""
-                      }`}
-                      onClick={() => handleCategoryChange(cat)}
-                    >
-                      {cat}
-                    </span>
-                  ))}
-                </Space>
-              </div>
-            )}
-
-            {/* Danh sách bài viết */}
-            <div className="posts-grid">
-              <Row gutter={[24, 24]}>
-                {currentPosts.length > 0 ? (
-                  currentPosts.map((p: Post) => (
-  <Col xs={24} md={12} lg={8} key={p.id}>
-    <div className="post-item" style={{ cursor: "pointer" }}>
-      <img src={p.image} alt={p.title} className="post-item-img" />
-      <div className="post-item-content">
-        <Text type="secondary" className="post-date">Date: {p.date}</Text>
-
-        {/* Bấm vào tiêu đề để vào chi tiết */}
-       <Title
-  level={5}
-  className="post-title"
-  onClick={() => navigate(`/article-detail/${p.id}`)} 
-  style={{ cursor: "pointer", margin: "8px 0" }}
->
-  {p.title} <RightOutlined className="arrow-icon" />
-</Title>
-
-        <Text className="post-excerpt">{p.excerpt}</Text>
-        <div className="card-footer">
-  <Tag className="compact-tag" color={getCategoryColor(p.category)}>
-    {p.category}
-  </Tag>
-
-  {selectedView === "All my posts" && (
- <a
-  href="#"
-  className="Edit"
-  onClick={(e) => {
-    e.preventDefault();
-    navigate(`/add-article/${p.id}`); 
-  }}
->
-  Edit your post
-</a>
-  )}
-</div>
-      </div>
-    </div>
-  </Col>
-                  ))
-                ) : (
-                  <Col span={24}>
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "40px",
-                        color: "#999",
-                      }}
-                    >
-                      <Title level={4}>No posts yet</Title>
-                      <Text>Start writing your first article!</Text>
-                    </div>
-                  </Col>
-                )}
-              </Row>
-            </div>
-
-            {/* Pagination */}
             {filteredPosts.length > postsPerPage && (
               <div className="pagination-wrapper">
                 <Pagination
                   current={currentPage}
                   pageSize={postsPerPage}
                   total={filteredPosts.length}
-                  onChange={(page: number) => setCurrentPage(page)}
+                  onChange={(page) => setCurrentPage(page)}
                   showSizeChanger={false}
                   showQuickJumper
                 />
@@ -306,55 +180,7 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="custom-footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <h2>MY BLOG</h2>
-          </div>
-          <div className="footer-col">
-            <h4>About</h4>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-              dictum aliquet accumsan porta lectus ridiculus in mattis. Nunc
-              sedales in volutpat ullamcorper amet adipiscing fermentum.
-            </p>
-          </div>
-          <div className="footer-col">
-            <h4>Company</h4>
-            <ul>
-              <li>About</li>
-              <li>Features</li>
-              <li>Works</li>
-              <li>Career</li>
-            </ul>
-          </div>
-          <div className="footer-col">
-            <h4>Help</h4>
-            <ul>
-              <li>Customer Support</li>
-              <li>Delivery Details</li>
-              <li>Terms & Conditions</li>
-              <li>Privacy Policy</li>
-            </ul>
-          </div>
-          <div className="footer-col">
-            <h4>Resources</h4>
-            <ul>
-              <li>Free eBooks</li>
-              <li>Development Tutorial</li>
-              <li>How to – Blog</li>
-              <li>Youtube Playlist</li>
-            </ul>
-          </div>
-        </div>
-        <div className="footer-social">
-          <i className="fab fa-twitter"></i>
-          <i className="fab fa-facebook-f"></i>
-          <i className="fab fa-instagram"></i>
-          <i className="fab fa-github"></i>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 };

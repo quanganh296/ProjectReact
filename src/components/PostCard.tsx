@@ -1,17 +1,19 @@
+// src/components/PostCard.tsx
 import React from "react";
-import { Card, Tag } from "antd";
-import { ArrowRightOutlined } from "@ant-design/icons";
+import { Card } from "antd";
 import "../styles/PostCard.css";
-import { getCategoryColor } from "../utils/categoryColor";
 
-interface PostCardProps {
+export interface PostCardProps {
+  id: number;
   title: string;
   date: string;
   category: string;
   excerpt: string;
   image: string;
-  isMine?: boolean; // Thêm để biết có phải bài của mình
-  onEdit?: () => void; // Optional
+  isMine?: boolean;
+  onEdit?: () => void;
+  onTitleClick?: () => void;
+  categoryColor?: string;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -20,32 +22,31 @@ const PostCard: React.FC<PostCardProps> = ({
   category,
   excerpt,
   image,
-  isMine = false,
+  isMine,
   onEdit,
+  onTitleClick,
+  categoryColor,
 }) => {
   return (
     <Card
       hoverable
-      cover={<img src={image} alt={title} className="main-img" />}
-      className="main-card"
+      cover={<img alt={title} src={image} style={{ height: 240, objectFit: "cover" }} />}
     >
-      <div className="post-content">
-        <p className="post-date">Date: {date}</p>
-        <h3 className="post-title">{title}</h3>
-        <p className="post-excerpt">{excerpt}</p>
-
-        {/* FOOTER: TAG + EDIT LINK */}
-        <div className="card-footer">
-          <Tag className="compact-tag" color={getCategoryColor(category)}>
-            {category}
-            <ArrowRightOutlined style={{ fontSize: "10px", marginLeft: "4px" }} />
-          </Tag>
-
-          {isMine && (
-            <a href="#" className="Edit" onClick={(e) => { e.preventDefault(); onEdit?.(); }}>
-              Edit your post
-            </a>
-          )}
+      <div className="post-card-content">
+        <h3 className="post-card-title" onClick={onTitleClick} style={{ cursor: "pointer" }}>
+          {title}
+        </h3>
+        <p className="post-card-date">{date}</p>
+        <p className="post-card-excerpt">{excerpt}</p>
+        <div className ="card-footer">
+        <a href="#" className="post-category" style={{ color: categoryColor }}>
+          {category}
+        </a>
+        {isMine && onEdit && (
+          <button className="Edit" onClick={onEdit}>
+            Edit
+          </button>
+        )}
         </div>
       </div>
     </Card>

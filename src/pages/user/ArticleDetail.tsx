@@ -1,96 +1,116 @@
+// src/pages/user/ArticleDetail.tsx
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../redux/store";
-import { Typography, Tag, Button, Input, Avatar, List } from "antd";
+import { useParams } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { Card, Avatar, Input, Button, List, Typography, message } from "antd";
+import { UserOutlined, CalendarOutlined } from "@ant-design/icons";
 import Header from "../../components/Header";
+import "../../styles/ArticleDetail.css";
+import type { RootState } from "../../redux/store";
+import { addComment } from "../../redux/commentsSlice";
+import type { Comment } from "../../types"; // TYPE-ONLY IMPORT
 
-const { Title, Paragraph, Text } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const ArticleDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const posts = useSelector((state: RootState) => state.posts.posts);
+  const comments = useSelector((state: RootState) =>
+    state.comments.comments.filter((c: Comment) => c.postId === Number(id))
+  );
 
   const post = posts.find((p) => p.id === Number(id));
-
-  const [comments, setComments] = useState<string[]>([]);
   const [newComment, setNewComment] = useState("");
 
-  if (!post) {
-    return (
-      <>
-        <Header />
-        <div style={{ padding: 24 }}>
-          <Title level={3}>Article not found</Title>
-          <Button type="primary" onClick={() => navigate("/")}>
-            Back Home
-          </Button>
-        </div>
-      </>
-    );
-  }
-
-  const handleAddComment = () => {
-    if (newComment.trim()) {
-      setComments((prev) => [...prev, newComment]);
-      setNewComment("");
+  const handleSubmit = () => {
+    if (!newComment.trim()) {
+      message.warning("Vui lòng nhập bình luận!");
+      return;
     }
+
+    dispatch(addComment(Number(id), newComment, "Bạn"));
+    setNewComment("");
+    message.success("Bình luận thành công!");
   };
+
+  if (!post) {
+    return <div className="text-center p-8">Bài viết không tồn tại</div>;
+  }
 
   return (
     <>
       <Header />
-      <div style={{ maxWidth: 800, margin: "24px auto", padding: 16 }}>
-        <Button onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
-          Back
-        </Button>
+      <div className="article-detail-container">
+        <Card className="article-card">
+          <div className="article-header">
+            <Avatar size={50} icon={<UserOutlined />} />
+            <div style={{ marginLeft: 12 }}>
+              <Text strong>{post.author || "Người dùng ẩn danh"}</Text>
+              <br />
+              <Text type="secondary">
+                <CalendarOutlined /> {post.date}
+              </Text>
+            </div>
+          </div>
 
-        <img
-          src={post.image}
-          alt={post.title}
-          style={{ width: "100%", borderRadius: 8, marginBottom: 16 }}
-        />
+          <Title level={2} className="mt-4">{post.title}</Title>
+          <img src={post.image} alt={post.title} className="article-image" />
 
-        <Text type="secondary">Date: {post.date}</Text>
-        <Title level={2}>{post.title}</Title>
+          <div className="article-content mt-4">
+            <Text>{post.excerpt}</Text>
+          </div>
 
-        <Tag color="blue">{post.category}</Tag>
+          <div className="article-actions">
+            <Button type="link">Like</Button>
+            <Button type="link">Share</Button>
+          </div>
+        </Card>
 
-        <Paragraph style={{ marginTop: 16, fontSize: "16px" }}>
-          {post.excerpt}
-        </Paragraph>
+        {/* Comments Section */}
+        <div className="comments-section mt-6">
+          <Title level={4}>Bình luận ({comments.length})</Title>
 
-        <Title level={4} style={{ marginTop: 32 }}>
-          Comments
-        </Title>
+          <div className="mb-4">
+            <TextArea
+              rows={3}
+              placeholder="Viết bình luận của bạn..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+            />
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              className="mt-2"
+              disabled={!newComment.trim()}
+            >
+              Gửi
+            </Button>
+          </div>
 
-        {/* Comment list */}
-        <List
-          dataSource={comments}
-          renderItem={(c) => (
-            <List.Item>
-              <List.Item.Meta
-                avatar={<Avatar />}
-                title={<Text strong>User</Text>}
-                description={c}
-              />
-            </List.Item>
-          )}
-        />
-
-        {/* Add comment */}
-        <TextArea
-          rows={3}
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Write a comment..."
-          style={{ marginTop: 12 }}
-        />
-        <Button type="primary" onClick={handleAddComment} style={{ marginTop: 8 }}>
-          Add Comment
-        </Button>
+          <List<Comment>
+            dataSource={comments}
+            renderItem={(item) => (
+              <List.Item>
+                <List.Item.Meta
+                  avatar={<Avatar icon={<UserOutlined />} />}
+                  title={<Text strong>{item.author}</Text>}
+                  description={
+                    <>
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        {item.date}
+                      </Text>
+                      <br />
+                      <Text>{item.text}</Text>
+                    </>
+                  }
+                />
+              </List.Item>
+            )}
+          />
+        </div>
       </div>
     </>
   );
