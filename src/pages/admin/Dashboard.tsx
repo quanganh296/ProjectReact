@@ -1,33 +1,89 @@
 import React from "react";
-import { Card } from "antd";
-import { UserOutlined, FileTextOutlined, AppstoreOutlined } from "@ant-design/icons";
+import { Table, Button, Tag } from "antd";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import "../../styles/AdminSidebar.css"
+import AdminLayout from "../../layout/AdminLayout";
 
-const Dashboard: React.FC = () => {
-  const stats = [
-    { title: "Tổng Users", value: 154, icon: <UserOutlined /> },
-    { title: "Tổng Bài viết", value: 12, icon: <FileTextOutlined /> },
-    { title: "Danh mục bài viết", value: 4, icon: <AppstoreOutlined /> },
+interface Entry {
+  id: number;
+  title: string;
+  category: string;
+  status: "Public" | "Private";
+}
+
+const sampleEntries: Entry[] = [
+  { id: 1, title: "Học nấu cá sốt cà chua", category: "Nấu ăn", status: "Public" },
+  { id: 2, title: "Bí kíp viết CV ngành IT", category: "IT", status: "Private" },
+];
+
+const ManagerEntries: React.FC = () => {
+  const columns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      width: 60,
+    },
+    {
+      title: "Tiêu đề",
+      dataIndex: "title",
+      key: "title",
+    },
+    {
+      title: "Chủ đề",
+      dataIndex: "category",
+      key: "category",
+      width: 150,
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 120,
+      render: (status: string) => (
+        <Tag color={status === "Public" ? "green" : "red"}>{status}</Tag>
+      ),
+    },
+    {
+      title: "Hành động",
+      key: "action",
+      width: 160,
+      render: () => (
+        <>
+          <Button icon={<EditOutlined />} type="primary" size="small" className="mr-2">
+            Sửa
+          </Button>
+          <Button icon={<DeleteOutlined />} danger size="small">
+            Xóa
+          </Button>
+        </>
+      ),
+    },
   ];
 
   return (
-    <div className="p-5">
-      <h2 className="font-bold text-xl mb-4">Admin Dashboard</h2>
+    <AdminLayout>
+    <div className="sidebar flex min-h-screen bg-gray-50">
+      
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        {stats.map((s) => (
-          <Card key={s.title}>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-gray-500">{s.title}</p>
-                <h3 className="text-2xl font-bold">{s.value}</h3>
-              </div>
-              <div className="text-3xl">{s.icon}</div>
-            </div>
-          </Card>
-        ))}
+      <div className="flex-1 p-6">
+        <h2 className="text-2xl font-semibold mb-4">📁 Quản lý bài viết</h2>
+
+        <Button type="primary" className="mb-4">
+          + Thêm bài viết
+        </Button>
+
+        <Table
+          dataSource={sampleEntries}
+          columns={columns}
+          pagination={{ pageSize: 5 }}
+          rowKey="id"
+          bordered
+        />
       </div>
     </div>
+    </AdminLayout>
   );
 };
 
-export default Dashboard;
+export default ManagerEntries;

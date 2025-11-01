@@ -13,7 +13,7 @@ import { UploadOutlined, SmileOutlined, FrownOutlined, MehOutlined } from "@ant-
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 import Header from "../../components/Header";
-import "../../layout/AddArticle.css";
+import "../../styles/AddArticle.css";
 import { type UploadFile, type UploadProps } from "antd";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store";

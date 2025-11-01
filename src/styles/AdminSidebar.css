@@ -1,0 +1,35 @@
+.admin-layout {
+  display: flex;
+  flex-direction: row !important;
+}
+
+.custom-table .ant-table-thead > tr > th {
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 500;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: #fafafa;
+}
+
+/* src/styles/AdminSidebar.css */
+.ant-table-column-sorter {
+  margin-left: 4px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+  user-select: none;
+}
+
+.cursor-pointer:hover {
+  color: #1890ff;
+}
+
+.log-out {
+    display: flex;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    text-align: start !important;
+}

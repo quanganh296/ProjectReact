@@ -22,6 +22,8 @@
 
 
 .login-form-wrapper {
+  position: fixed
+  ;
   padding: 10px;
   border-radius: 8px;
   max-width: 434px;

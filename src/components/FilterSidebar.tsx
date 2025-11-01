@@ -1,6 +1,6 @@
 import React from "react";
 import { Tabs } from "antd";
-import "../layout/FilterSidebar.css";
+import "../styles/FilterSidebar.css";
 
 interface FilterSidebarProps {
   selectedView: string;

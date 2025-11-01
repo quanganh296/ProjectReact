@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Tag } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
-import "../layout/PostCard.css";
+import "../styles/PostCard.css";
 import { getCategoryColor } from "../utils/categoryColor";
 
 interface PostCardProps {

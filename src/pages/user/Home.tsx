@@ -12,9 +12,9 @@ import {
 } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import Header from "../../components/Header";
-import "../../layout/Home.css";
-import "../../layout/PostCard.css";
-import "../../layout/Footer.css";
+import "../../styles/Home.css";
+import "../../styles/PostCard.css";
+import "../../styles/Footer.css";
 import { getCategoryColor } from "../../utils/categoryColor";
 import { useAuth } from "../../context/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
