@@ -1,6 +1,6 @@
 // src/components/PostCard.tsx
 import React from "react";
-import { Card } from "antd";
+import { Card, Button } from "antd";
 import "../styles/PostCard.css";
 
 export interface PostCardProps {
@@ -12,7 +12,7 @@ export interface PostCardProps {
   image: string;
   isMine?: boolean;
   onEdit?: () => void;
-  onTitleClick?: () => void;
+  onTitleClick?: () => void; // ← Click vào tiêu đề / card
   categoryColor?: string;
 }
 
@@ -31,22 +31,42 @@ const PostCard: React.FC<PostCardProps> = ({
     <Card
       hoverable
       cover={<img alt={title} src={image} style={{ height: 240, objectFit: "cover" }} />}
+      onClick={onTitleClick} // ← Click toàn bộ card → vào chi tiết
+      style={{ cursor: onTitleClick ? "pointer" : "default" }}
     >
       <div className="post-card-content">
-        <h3 className="post-card-title" onClick={onTitleClick} style={{ cursor: "pointer" }}>
+        {/* Click vào tiêu đề cũng vào chi tiết */}
+        <h3
+          className="post-card-title"
+          style={{ margin: 0, cursor: "pointer" }}
+          onClick={(e) => {
+            e.stopPropagation(); // Ngăn click card
+            onTitleClick?.();
+          }}
+        >
           {title}
         </h3>
+
         <p className="post-card-date">{date}</p>
         <p className="post-card-excerpt">{excerpt}</p>
-        <div className ="card-footer">
-        <a href="#" className="post-category" style={{ color: categoryColor }}>
-          {category}
-        </a>
-        {isMine && onEdit && (
-          <button className="Edit" onClick={onEdit}>
-            Edit
-          </button>
-        )}
+
+        <div
+          className="card-footer"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+          onClick={(e) => e.stopPropagation()} // ← Chặn lan tỏa khi bấm Edit
+        >
+          <span className="post-category" style={{ color: categoryColor }}>
+            {category}
+          </span>
+          {isMine && onEdit && (
+            <Button type="link" size="small" onClick={onEdit}>
+              Edit
+            </Button>
+          )}
         </div>
       </div>
     </Card>

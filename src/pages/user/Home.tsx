@@ -1,4 +1,4 @@
-// src/pages/user/HomePage.tsx
+// src/pages/user/Home.tsx
 import React, { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store";
@@ -32,9 +32,7 @@ const HomePage: React.FC = () => {
   const posts = useSelector((state: RootState) => state.posts.posts);
 
   const shouldReset = Boolean(location.state?.resetToAllBlogs);
-  const [selectedView, setSelectedView] = useState(
-    shouldReset ? "All blog posts" : "All blog posts"
-  );
+  const [selectedView, setSelectedView] = useState("All blog posts");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 6;
@@ -86,75 +84,92 @@ const HomePage: React.FC = () => {
     <>
       <Header />
       <div className="homepage-container">
-        {/* Nếu chọn "All my posts", ẩn Recent posts và hiển thị Add new article */}
         {selectedView === "All my posts" ? (
-          <div
-            style={{
-              maxWidth: "1280px",
-              margin: "40px auto",
-              padding: "0 20px",
-              textAlign: "center",
-            }}
-          >
-            <h2>All my posts</h2>
+          <div className="text-center my-8">
             <Button
               type="primary"
               size="large"
               onClick={() => navigate("/add-article")}
-              style={{ marginTop: "20px" }}
             >
-              + Add new article
+              Add New Article
             </Button>
           </div>
         ) : (
-          <>
-            {/* Featured Section */}
-            <h2 style={{ maxWidth: "1280px", margin: "40px auto 20px", padding: "0 20px" }}>
-              Recent posts
-            </h2>
+          <h2
+            style={{
+              maxWidth: "1280px",
+              margin: "40px auto 20px",
+              padding: "0 20px",
+            }}
+          >
+            Recent posts
+          </h2>
+        )}
 
-            {filteredPosts.length > 0 && (
-              <div
-                className="featured-section"
-                style={{ display: "flex", gap: "20px", maxWidth: "1280px", margin: "0 auto" }}
-              >
-                {currentPosts[0] && (
-                  <PostCard
-                    id={currentPosts[0].id}
-                    title={currentPosts[0].title}
-                    date={currentPosts[0].date}
-                    category={currentPosts[0].category}
-                    excerpt={currentPosts[0].excerpt}
-                    image={currentPosts[0].image}
-                    isMine={currentPosts[0].isMine}
-                    onEdit={() => navigate(`/add-article/${currentPosts[0].id}`)}
-                    onTitleClick={() => navigate(`/article/${currentPosts[0].id}`)}
-                    categoryColor={getCategoryColor(currentPosts[0].category)}
-                  />
-                )}
-
-                <div className="side-posts-container">
-                  {currentPosts.slice(1, 3).map((post) => (
-                    <div key={post.id} className="side-post-card">
-                      <img src={post.image} alt={post.title} className="side-post-img" />
-                      <div className="side-post-content">
-                        <h4 className="side-post-title">{post.title}</h4>
-                        <p className="post-date">{post.date}</p>
-                        <p className="side-post-excerpt">{post.excerpt}</p>
-                        <a
-                          href="#"
-                          className="post-category"
-                          style={{ color: getCategoryColor(post.category) }}
-                        >
-                          {post.category}
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {currentPosts.length > 0 && (
+          <div
+            className="featured-section"
+            style={{
+              display: "flex",
+              gap: "20px",
+              maxWidth: "1280px",
+              margin: "0 auto",
+            }}
+          >
+            {/* Main Post */}
+            {currentPosts[0] && (
+              <PostCard
+                id={currentPosts[0].id}
+                title={currentPosts[0].title}
+                date={currentPosts[0].date}
+                category={currentPosts[0].category}
+                excerpt={currentPosts[0].excerpt}
+                image={currentPosts[0].image}
+                isMine={currentPosts[0].isMine && selectedView === "All my posts"}
+                onEdit={() =>
+                  navigate(`/add-article/${currentPosts[0].id}`)
+                }
+                onTitleClick={() =>
+                  navigate(`/article/${currentPosts[0].id}`)
+                }
+                categoryColor={getCategoryColor(currentPosts[0].category)}
+              />
             )}
-          </>
+
+            {/* Side Posts */}
+            <div className="side-posts-container">
+              {currentPosts.slice(1, 3).map((p) => (
+                <div key={p.id} className="side-post-card">
+                  <img src={p.image} alt={p.title} className="side-post-img" />
+                  <div className="side-post-content">
+                    <h4
+                      className="side-post-title cursor-pointer"
+                      onClick={() => navigate(`/article/${p.id}`)}
+                    >
+                      {p.title}
+                    </h4>
+                    <p className="post-date">{p.date}</p>
+                    <p className="side-post-excerpt">{p.excerpt}</p>
+                    <span
+                      className="post-category"
+                      style={{ color: getCategoryColor(p.category) }}
+                    >
+                      {p.category}
+                    </span>
+                    {p.isMine && selectedView === "All my posts" && (
+                      <Button
+                        type="link"
+                        size="small"
+                        onClick={() => navigate(`/add-article/${p.id}`)}
+                      >
+                        Edit
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         <FilterSidebar
@@ -165,41 +180,43 @@ const HomePage: React.FC = () => {
         />
 
         {/* List posts */}
-        <div className="posts-section-card">
-          <div className="posts-section-inner">
-            <Row gutter={[24, 24]}>
-              {currentPosts.map((post) => (
-                <Col key={post.id} xs={24} sm={12} lg={8}>
-                  <PostCard
-                    id={post.id}
-                    title={post.title}
-                    date={post.date}
-                    category={post.category}
-                    excerpt={post.excerpt}
-                    image={post.image}
-                    isMine={post.isMine}
-                    onEdit={() => navigate(`/add-article/${post.id}`)}
-                    onTitleClick={() => navigate(`/article/${post.id}`)}
-                    categoryColor={getCategoryColor(post.category)}
-                  />
-                </Col>
-              ))}
-            </Row>
+        {selectedView !== "All my posts" && (
+          <div className="posts-section-card">
+            <div className="posts-section-inner">
+              <Row gutter={[24, 24]}>
+                {currentPosts.map((p) => (
+                  <Col key={p.id} xs={24} sm={12} lg={8}>
+                    <PostCard
+                      id={p.id}
+                      title={p.title}
+                      date={p.date}
+                      category={p.category}
+                      excerpt={p.excerpt}
+                      image={p.image}
+                      isMine={p.isMine}
+                      onEdit={() => navigate(`/add-article/${p.id}`)}
+                      onTitleClick={() => navigate(`/article/${p.id}`)}
+                      categoryColor={getCategoryColor(p.category)}
+                    />
+                  </Col>
+                ))}
+              </Row>
 
-            {filteredPosts.length > postsPerPage && (
-              <div className="pagination-wrapper">
-                <Pagination
-                  current={currentPage}
-                  pageSize={postsPerPage}
-                  total={filteredPosts.length}
-                  onChange={(page) => setCurrentPage(page)}
-                  showSizeChanger={false}
-                  showQuickJumper
-                />
-              </div>
-            )}
+              {filteredPosts.length > postsPerPage && (
+                <div className="pagination-wrapper">
+                  <Pagination
+                    current={currentPage}
+                    pageSize={postsPerPage}
+                    total={filteredPosts.length}
+                    onChange={(page) => setCurrentPage(page)}
+                    showSizeChanger={false}
+                    showQuickJumper
+                  />
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <Footer />

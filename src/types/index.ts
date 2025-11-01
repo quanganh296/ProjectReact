@@ -10,7 +10,8 @@ export interface Comment {
 export interface Post {
   id: number;
   title: string;
-  excerpt: string;
+  excerpt: string;        // tóm tắt (150 ký tự đầu)
+  content: string;        // nội dung đầy đủ
   image: string;
   date: string;
   category: string;
@@ -18,4 +19,6 @@ export interface Post {
   isMine?: boolean;
   status?: "public" | "private";
   author?: string;
+  likes: number;
+  comments: Comment[];
 }

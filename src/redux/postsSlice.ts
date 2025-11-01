@@ -1,18 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
-
-interface Post {
-  id: number;
-  title: string;
-  excerpt: string;
-  image: string;
-  date: string;
-  category: string;
-  mood?: string;
-  isMine?: boolean;
-  status?: "public" | "private";
-  author?: string;
-}
+  import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { Post } from "../types";
 
 interface PostsState {
   posts: Post[];
@@ -22,79 +9,34 @@ const initialState: PostsState = {
   posts: [
     {
       id: 1,
-      title: "A Productive Day at Work",
-      date: "2025-02-25",
+      title: "Hôm nay là một ngày tuyệt vời",
+      excerpt: "Hôm nay tôi thức dậy sớm, đi dạo công viên và cảm thấy thật bình yên...",
+      content: `Hôm nay tôi thức dậy sớm, đi dạo công viên và cảm thấy thật bình yên. 
+      
+      Mặt trời vừa ló dạng, không khí trong lành, tiếng chim hót líu lo. 
+      Tôi đã uống một ly cà phê nóng và viết vài dòng nhật ký. 
+      
+      Cuộc sống đôi khi chỉ cần những khoảnh khắc nhỏ như vậy để thấy hạnh phúc.`,
+      image: "https://picsum.photos/800/400",
+      date: "2025-10-30",
       category: "Daily Journal",
-      excerpt:
-        "Today was a really productive day at work. I managed to finish a report ahead of schedule and received positive feedback from my manager.",
-      image: "/Auth/Image (6).png",
+      mood: "happy",
       isMine: true,
-      mood: "happy",
-    },
-    {
-      id: 2,
-      title: "My First Job Interview Experience",
-      date: "2025-02-24",
-      category: "Work & Career",
-      excerpt:
-        "I had my first job interview today! I was nervous at first, but as the conversation went on, I felt more confident. ",
-      image: "/Auth/Image (1).png",
-      isMine: true,
-      mood: "happy",
-    },
-    {
-      id: 3,
-      title: "Overthinking Everything",
-      date: "2025-02-23",
-      category: "Personal Thoughts",
-      excerpt:
-        "Lately, I have been overthinking everything, from small decisions to bigger life choices.",
-      image: "/Auth/Image (2).png",
-      isMine: true,
-      mood: "happy",
-    },
-    {
-      id: 4,
-      title: "How Collaboration Makes Us Better Designers",
-      date: "2025-02-21",
-      category: "Work & Career",
-      excerpt:
-        "We learn more and build stronger teams through collaboration.",
-      image: "/Auth/Image (3).png",
-      isMine: false,
-      mood: "happy",
-    },
-     {
-      id: 5,
-      title: "Our top 10 Javascript frameworks to use",
-      date: "2025-02-21",
-      category: "Work & Career",
-      excerpt:
-        "JavaScript frameworks make development easy with extensive features and functionalities.",
-      image: "/Auth/Image (4).png",
-      isMine: false,
-      mood: "happy",
-    },
-     {
-      id: 6,
-      title: "Podcast: Creating a better CX Community",
-      date: "2025-02-05",
-      category: "Emotions & Feelings",
-      excerpt:
-        "Starting a community doesn’t need to be complicated, but how do you get started?",
-      image: "/Auth/Image (5).png",
-      isMine: true,
-      mood: "happy",
-    },
-  ],
+      status: "public",
+      likes: 15,
+      comments: [
+        { id: 1, postId: 1, text: "Bài viết hay quá!", author: "Lan", date: "2025-10-31" },
+        { id: 2, postId: 1, text: "Mình cũng thích đi dạo sáng", author: "Minh", date: "2025-10-31" }
+      ]
+    }
+  ]
 };
-
 
 const postsSlice = createSlice({
   name: "posts",
   initialState,
   reducers: {
-    setPosts(state, action: PayloadAction<Post[]>) {
+    setPosts: (state, action: PayloadAction<Post[]>) => {
       state.posts = action.payload;
     },
   },

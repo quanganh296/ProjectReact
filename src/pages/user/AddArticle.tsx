@@ -40,17 +40,13 @@ const AddArticle: React.FC = () => {
 
   const dispatch = useDispatch();
   const posts = useSelector((state: RootState) => state.posts.posts);
-
-  // ✅ Lấy category từ context
   const { categories } = useCategories();
-  const [categoryOptions, setCategoryOptions] = useState<{ label: string; value: string }[]>([]);
 
-  // Cập nhật category options mỗi khi categories trong context thay đổi
-  useEffect(() => {
-    setCategoryOptions(categories.map((cat) => ({ label: cat.name, value: cat.name })));
-  }, [categories]);
+  const categoryOptions = categories.map((cat) => ({
+    label: cat.name,
+    value: cat.name,
+  }));
 
-  // Load dữ liệu nếu edit
   useEffect(() => {
     if (isEdit && id) {
       const post = posts.find((p) => p.id === Number(id));
@@ -59,7 +55,7 @@ const AddArticle: React.FC = () => {
           title: post.title,
           category: post.category,
           mood: post.mood || "happy",
-          content: post.excerpt,
+          content: post.content,
           status: post.status || "public",
         });
         if (post.image) {
@@ -72,9 +68,12 @@ const AddArticle: React.FC = () => {
             },
           ]);
         }
+      } else {
+        message.error("Không tìm thấy bài viết!");
+        navigate("/home");
       }
     }
-  }, [id, isEdit, form, posts]);
+  }, [id, isEdit, form, posts, navigate]);
 
   const onFinish = (values: ArticleFormValues) => {
     const newPost = {
@@ -82,11 +81,14 @@ const AddArticle: React.FC = () => {
       title: values.title,
       category: values.category,
       mood: values.mood,
-      excerpt: values.content,
+      excerpt: values.content.slice(0, 150) + (values.content.length > 150 ? "..." : ""),
+      content: values.content,
       image: fileList[0]?.url || "/default-image.png",
       date: new Date().toISOString().split("T")[0],
       isMine: true,
       status: values.status,
+      likes: isEdit ? posts.find(p => p.id === Number(id))?.likes || 0 : 0,
+      comments: isEdit ? posts.find(p => p.id === Number(id))?.comments || [] : []
     };
 
     const updatedPosts = isEdit
@@ -94,7 +96,7 @@ const AddArticle: React.FC = () => {
       : [...posts, newPost];
 
     dispatch(setPosts(updatedPosts));
-    message.success(isEdit ? "Cập nhật thành công!" : "Thêm bài viết thành công!");
+    message.success(isEdit ? "Cập nhật thành công!" : "Đăng bài thành công!");
     navigate("/home", { state: { resetToAllBlogs: true } });
   };
 
@@ -114,7 +116,7 @@ const AddArticle: React.FC = () => {
         ]);
       };
       reader.readAsDataURL(file);
-      return false; // Ngăn upload thật
+      return false;
     },
   };
 
@@ -127,33 +129,15 @@ const AddArticle: React.FC = () => {
         </Title>
         <div className="add-article-form">
           <Form form={form} layout="vertical" onFinish={onFinish}>
-            {/* TITLE */}
-            <Form.Item
-              label="Tiêu đề"
-              name="title"
-              rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
-            >
+            <Form.Item label="Tiêu đề" name="title" rules={[{ required: true }]}>
               <Input placeholder="Nhập tiêu đề bài viết" />
             </Form.Item>
 
-            {/* CATEGORY */}
-            <Form.Item
-              label="Chủ đề"
-              name="category"
-              rules={[{ required: true, message: "Vui lòng chọn chủ đề!" }]}
-            >
-              <Select
-                placeholder="Chọn chủ đề"
-                options={categoryOptions}
-              />
+            <Form.Item label="Chủ đề" name="category" rules={[{ required: true }]}>
+              <Select placeholder="Chọn chủ đề" options={categoryOptions} />
             </Form.Item>
 
-            {/* MOOD */}
-            <Form.Item
-              label="Tâm trạng"
-              name="mood"
-              rules={[{ required: true, message: "Vui lòng chọn tâm trạng!" }]}
-            >
+            <Form.Item label="Tâm trạng" name="mood" rules={[{ required: true }]}>
               <Select placeholder="Bạn đang cảm thấy thế nào?">
                 <Select.Option value="happy">Happy</Select.Option>
                 <Select.Option value="excited">Excited</Select.Option>
@@ -162,16 +146,10 @@ const AddArticle: React.FC = () => {
               </Select>
             </Form.Item>
 
-            {/* CONTENT */}
-            <Form.Item
-              label="Nội dung"
-              name="content"
-              rules={[{ required: true, message: "Vui lòng viết nội dung!" }]}
-            >
-              <TextArea rows={6} placeholder="Viết bài của bạn tại đây..." />
+            <Form.Item label="Nội dung" name="content" rules={[{ required: true }]}>
+              <TextArea rows={8} placeholder="Viết bài của bạn tại đây..." />
             </Form.Item>
 
-            {/* STATUS */}
             <Form.Item label="Trạng thái" name="status" initialValue="public">
               <Radio.Group>
                 <Radio value="public">Công khai</Radio>
@@ -179,14 +157,12 @@ const AddArticle: React.FC = () => {
               </Radio.Group>
             </Form.Item>
 
-            {/* UPLOAD IMAGE */}
             <Form.Item label="Hình ảnh">
               <Upload {...uploadProps} listType="picture">
                 <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
               </Upload>
             </Form.Item>
 
-            {/* SUBMIT */}
             <Form.Item>
               <Button type="primary" htmlType="submit" block size="large">
                 {isEdit ? "Cập nhật" : "Đăng bài"}
