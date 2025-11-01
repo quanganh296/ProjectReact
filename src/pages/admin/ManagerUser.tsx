@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from "react";
+// src/pages/admin/ManagerUser.tsx
+import React, { useState, useMemo, useEffect } from "react"; 
 import { Table, Button, Input, Tag, Avatar } from "antd";
 import { SortAscendingOutlined, SortDescendingOutlined } from "@ant-design/icons";
 import AdminLayout from "../../layout/AdminLayout";
@@ -21,8 +22,8 @@ const ManagerUser: React.FC = () => {
     { id: 4, avatar: "https://via.placeholder.com/40", name: "Dani Wilkinson", email: "daniwilkinson@gmail.com", status: "active" },
   ];
 
-  // ✅ Load users từ localStorage
-  const getStoredUsers = () => {
+  // Load users từ localStorage
+  const getStoredUsers = (): User[] => {
     const stored = localStorage.getItem("users");
     return stored ? (JSON.parse(stored) as User[]) : defaultUsers;
   };
@@ -32,7 +33,7 @@ const ManagerUser: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
-  // ✅ Khi users thay đổi → lưu lại localStorage
+  // Khi users thay đổi → lưu lại localStorage
   useEffect(() => {
     localStorage.setItem("users", JSON.stringify(users));
   }, [users]);
@@ -45,7 +46,7 @@ const ManagerUser: React.FC = () => {
     setUsers(prev => prev.map(u => u.id === id ? { ...u, status: "active" } : u));
   };
 
-  // ✅ Lọc + Sort theo tên
+  // Lọc + sort theo tên/email
   const filteredAndSortedUsers = useMemo(() => {
     const result = users.filter(u =>
       u.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -106,7 +107,7 @@ const ManagerUser: React.FC = () => {
     {
       title: "Actions",
       key: "actions",
-      render: (record: User) => (
+      render: (_: unknown, record: User) => (
         <div className="flex gap-2">
           <Button 
             size="small" 

@@ -1,119 +1,209 @@
-// src/pages/user/ArticleDetail.tsx
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { Card, Avatar, Input, Button, List, Typography, message } from "antd";
-import { UserOutlined, CalendarOutlined } from "@ant-design/icons";
+// src/pages/user/AddArticle.tsx
+import React, { useState, useEffect } from "react";
+import {
+  Form,
+  Input,
+  Select,
+  Radio,
+  Button,
+  Upload,
+  message,
+  Typography,
+} from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../components/Header";
-import "../../styles/ArticleDetail.css";
+import "../../styles/AddArticle.css";
+import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../redux/store";
-import { addComment } from "../../redux/commentsSlice";
-import type { Comment } from "../../types"; // TYPE-ONLY IMPORT
+import { setPosts } from "../../redux/postsSlice";
+import type { UploadFile } from "antd";
+import { useCategories } from "../../context/CategoryContext";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { TextArea } = Input;
 
-const ArticleDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+interface ArticleFormValues {
+  title: string;
+  category: string;
+  mood: string;
+  content: string;
+  status: "public" | "private";
+}
+
+const AddArticle: React.FC = () => {
+  const [form] = Form.useForm<ArticleFormValues>();
+  const navigate = useNavigate();
+  const { id } = useParams<{ id?: string }>();
+  const isEdit = Boolean(id);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+
   const dispatch = useDispatch();
-
   const posts = useSelector((state: RootState) => state.posts.posts);
-  const comments = useSelector((state: RootState) =>
-    state.comments.comments.filter((c: Comment) => c.postId === Number(id))
-  );
 
-  const post = posts.find((p) => p.id === Number(id));
-  const [newComment, setNewComment] = useState("");
+  // ✅ Lấy category từ context
+  const { categories } = useCategories();
 
-  const handleSubmit = () => {
-    if (!newComment.trim()) {
-      message.warning("Vui lòng nhập bình luận!");
-      return;
+  // Khi categories thay đổi, reset field để cập nhật danh sách mới
+  useEffect(() => {
+    if (!isEdit) {
+      form.setFieldsValue({ category: undefined });
+    }
+  }, [categories, form, isEdit]);
+
+  // Nếu đang edit, load dữ liệu cũ
+  useEffect(() => {
+    if (isEdit && id) {
+      const post = posts.find((p) => p.id === Number(id));
+      if (post) {
+        form.setFieldsValue({
+          title: post.title,
+          category: post.category,
+          mood: post.mood || "happy",
+          content: post.excerpt,
+          status: post.status || "public",
+        });
+        if (post.image) {
+          setFileList([
+            {
+              uid: "-1",
+              name: "image.png",
+              status: "done",
+              url: post.image,
+            },
+          ]);
+        }
+      }
+    }
+  }, [id, isEdit, form, posts]);
+
+  const onFinish = (values: ArticleFormValues) => {
+    const newPost = {
+      id: isEdit ? Number(id) : Date.now(),
+      title: values.title,
+      category: values.category,
+      mood: values.mood,
+      excerpt: values.content,
+      image: fileList[0]?.url || "/default-image.png",
+      date: new Date().toISOString().split("T")[0],
+      isMine: true,
+      status: values.status,
+    };
+
+    let updatedPosts;
+    if (isEdit) {
+      updatedPosts = posts.map((p) => (p.id === Number(id) ? { ...p, ...newPost } : p));
+    } else {
+      updatedPosts = [...posts, newPost];
     }
 
-    dispatch(addComment(Number(id), newComment, "Bạn"));
-    setNewComment("");
-    message.success("Bình luận thành công!");
+    dispatch(setPosts(updatedPosts));
+    message.success(isEdit ? "Cập nhật thành công!" : "Thêm bài viết thành công!");
+    navigate("/home", { state: { resetToAllBlogs: true } });
   };
 
-  if (!post) {
-    return <div className="text-center p-8">Bài viết không tồn tại</div>;
-  }
+  const uploadProps = {
+    fileList,
+    onRemove: () => setFileList([]),
+    beforeUpload: (file: File) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFileList([
+          {
+            uid: "-1",
+            name: file.name,
+            status: "done",
+            url: e.target?.result as string,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+      return false; // Ngăn upload thật
+    },
+  };
 
   return (
     <>
       <Header />
-      <div className="article-detail-container">
-        <Card className="article-card">
-          <div className="article-header">
-            <Avatar size={50} icon={<UserOutlined />} />
-            <div style={{ marginLeft: 12 }}>
-              <Text strong>{post.author || "Người dùng ẩn danh"}</Text>
-              <br />
-              <Text type="secondary">
-                <CalendarOutlined /> {post.date}
-              </Text>
-            </div>
-          </div>
-
-          <Title level={2} className="mt-4">{post.title}</Title>
-          <img src={post.image} alt={post.title} className="article-image" />
-
-          <div className="article-content mt-4">
-            <Text>{post.excerpt}</Text>
-          </div>
-
-          <div className="article-actions">
-            <Button type="link">Like</Button>
-            <Button type="link">Share</Button>
-          </div>
-        </Card>
-
-        {/* Comments Section */}
-        <div className="comments-section mt-6">
-          <Title level={4}>Bình luận ({comments.length})</Title>
-
-          <div className="mb-4">
-            <TextArea
-              rows={3}
-              placeholder="Viết bình luận của bạn..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-            />
-            <Button
-              type="primary"
-              onClick={handleSubmit}
-              className="mt-2"
-              disabled={!newComment.trim()}
+      <div className="add-article-container">
+        <Title level={2} className="text-center mb-6">
+          {isEdit ? "Chỉnh sửa bài viết" : "Viết bài mới"}
+        </Title>
+        <div className="add-article-form">
+          <Form form={form} layout="vertical" onFinish={onFinish}>
+            {/* TITLE */}
+            <Form.Item
+              label="Tiêu đề"
+              name="title"
+              rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
             >
-              Gửi
-            </Button>
-          </div>
+              <Input placeholder="Nhập tiêu đề bài viết" />
+            </Form.Item>
 
-          <List<Comment>
-            dataSource={comments}
-            renderItem={(item) => (
-              <List.Item>
-                <List.Item.Meta
-                  avatar={<Avatar icon={<UserOutlined />} />}
-                  title={<Text strong>{item.author}</Text>}
-                  description={
-                    <>
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {item.date}
-                      </Text>
-                      <br />
-                      <Text>{item.text}</Text>
-                    </>
-                  }
-                />
-              </List.Item>
-            )}
-          />
+            {/* CATEGORY */}
+            <Form.Item
+              label="Chủ đề"
+              name="category"
+              rules={[{ required: true, message: "Vui lòng chọn chủ đề!" }]}
+            >
+              <Select placeholder="Chọn chủ đề" key={categories.length}>
+                {categories.map((cat) => (
+                  <Select.Option key={cat.key} value={cat.name}>
+                    {cat.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            {/* MOOD */}
+            <Form.Item
+              label="Tâm trạng"
+              name="mood"
+              rules={[{ required: true, message: "Vui lòng chọn tâm trạng!" }]}
+            >
+              <Select placeholder="Bạn đang cảm thấy thế nào?">
+                <Select.Option value="happy">Happy</Select.Option>
+                <Select.Option value="excited">Excited</Select.Option>
+                <Select.Option value="calm">Calm</Select.Option>
+                <Select.Option value="tired">Tired</Select.Option>
+              </Select>
+            </Form.Item>
+
+            {/* CONTENT */}
+            <Form.Item
+              label="Nội dung"
+              name="content"
+              rules={[{ required: true, message: "Vui lòng viết nội dung!" }]}
+            >
+              <TextArea rows={6} placeholder="Viết bài của bạn tại đây..." />
+            </Form.Item>
+
+            {/* STATUS */}
+            <Form.Item label="Trạng thái" name="status" initialValue="public">
+              <Radio.Group>
+                <Radio value="public">Công khai</Radio>
+                <Radio value="private">Riêng tư</Radio>
+              </Radio.Group>
+            </Form.Item>
+
+            {/* UPLOAD IMAGE */}
+            <Form.Item label="Hình ảnh">
+              <Upload {...uploadProps} listType="picture">
+                <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
+              </Upload>
+            </Form.Item>
+
+            {/* SUBMIT */}
+            <Form.Item>
+              <Button type="primary" htmlType="submit" block size="large">
+                {isEdit ? "Cập nhật" : "Đăng bài"}
+              </Button>
+            </Form.Item>
+          </Form>
         </div>
       </div>
     </>
   );
 };
 
-export default ArticleDetail;
+export default AddArticle;

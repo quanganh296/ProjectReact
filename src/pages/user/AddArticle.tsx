@@ -17,7 +17,8 @@ import "../../styles/AddArticle.css";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../redux/store";
 import { setPosts } from "../../redux/postsSlice";
-import type { UploadFile } from "antd"; // Chỉ cần UploadFile
+import type { UploadFile } from "antd";
+import { useCategories } from "../../context/CategoryContext";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -39,8 +40,17 @@ const AddArticle: React.FC = () => {
 
   const dispatch = useDispatch();
   const posts = useSelector((state: RootState) => state.posts.posts);
-  const categories = useSelector((state: RootState) => state.categories.categories);
 
+  // ✅ Lấy category từ context
+  const { categories } = useCategories();
+  const [categoryOptions, setCategoryOptions] = useState<{ label: string; value: string }[]>([]);
+
+  // Cập nhật category options mỗi khi categories trong context thay đổi
+  useEffect(() => {
+    setCategoryOptions(categories.map((cat) => ({ label: cat.name, value: cat.name })));
+  }, [categories]);
+
+  // Load dữ liệu nếu edit
   useEffect(() => {
     if (isEdit && id) {
       const post = posts.find((p) => p.id === Number(id));
@@ -79,12 +89,9 @@ const AddArticle: React.FC = () => {
       status: values.status,
     };
 
-    let updatedPosts;
-    if (isEdit) {
-      updatedPosts = posts.map((p) => (p.id === Number(id) ? { ...p, ...newPost } : p));
-    } else {
-      updatedPosts = [...posts, newPost];
-    }
+    const updatedPosts = isEdit
+      ? posts.map((p) => (p.id === Number(id) ? { ...p, ...newPost } : p))
+      : [...posts, newPost];
 
     dispatch(setPosts(updatedPosts));
     message.success(isEdit ? "Cập nhật thành công!" : "Thêm bài viết thành công!");
@@ -135,13 +142,10 @@ const AddArticle: React.FC = () => {
               name="category"
               rules={[{ required: true, message: "Vui lòng chọn chủ đề!" }]}
             >
-              <Select placeholder="Chọn chủ đề">
-                {categories.map((cat) => (
-                  <Select.Option key={cat.id} value={cat.name}>
-                    {cat.name}
-                  </Select.Option>
-                ))}
-              </Select>
+              <Select
+                placeholder="Chọn chủ đề"
+                options={categoryOptions}
+              />
             </Form.Item>
 
             {/* MOOD */}

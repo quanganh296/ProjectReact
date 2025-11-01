@@ -1,67 +1,101 @@
 // src/pages/admin/ManagerEntries.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input, Button, Table, message, Space } from "antd";
 import { SearchOutlined, FolderOutlined } from "@ant-design/icons";
 import AdminLayout from "../../layout/AdminLayout";
 import { useCategories } from "../../context/CategoryContext";
 import type { Category } from "../../context/types"; 
 
+const LOCAL_STORAGE_KEY = "blogCategories";
+
 const ManagerEntries: React.FC = () => {
   const { categories, addCategory, deleteCategory } = useCategories();
+  const [localCategories, setLocalCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const [searchText, setSearchText] = useState("");
 
+  // Load category từ localStorage khi mount
+  useEffect(() => {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (stored) {
+      setLocalCategories(JSON.parse(stored));
+    } else {
+      setLocalCategories(categories);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(categories));
+    }
+  }, [categories]);
+
+  // Hàm thêm category
   const handleAddCategory = () => {
-    if (!newCategory.trim()) {
+    const trimmed = newCategory.trim();
+    if (!trimmed) {
       message.warning("Vui lòng nhập tên chủ đề!");
       return;
     }
-    const success = addCategory(newCategory.trim());
-    if (success) {
-      setNewCategory("");
-      message.success("Thêm chủ đề thành công!");
-    } else {
+
+    // Kiểm tra trùng lặp
+    if (localCategories.find((c) => c.name.toLowerCase() === trimmed.toLowerCase())) {
       message.error("Chủ đề đã tồn tại!");
+      return;
     }
+
+    const newCat: Category = { key: Date.now().toString(), name: trimmed };
+    const updatedCategories = [...localCategories, newCat];
+
+    setLocalCategories(updatedCategories);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedCategories));
+
+    // Nếu có context, cập nhật luôn
+    addCategory(trimmed);
+
+    setNewCategory("");
+    message.success("Thêm chủ đề thành công!");
   };
 
   const handleDelete = (key: string) => {
-    const success = deleteCategory(key);
-    if (success) {
-      message.success("Xóa chủ đề thành công!");
-    } else {
+    if (parseInt(key) <= 4) {
       message.error("Không thể xóa chủ đề mặc định!");
+      return;
     }
+
+    const updatedCategories = localCategories.filter((c) => c.key !== key);
+    setLocalCategories(updatedCategories);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedCategories));
+
+    // Nếu có context, xóa luôn
+    deleteCategory(key);
+
+    message.success("Xóa chủ đề thành công!");
   };
 
-  const filteredCategories = categories.filter((cat) =>
+  const filteredCategories = localCategories.filter((cat) =>
     cat.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const columns = [
-  {
-    title: "#",
-    key: "index",
-    width: 60,
-    render: (_: unknown, __: Category, i: number) => i + 1,
-  },
+    {
+      title: "#",
+      key: "index",
+      width: 60,
+      render: (_: unknown, __: Category, i: number) => i + 1,
+    },
     { title: "Category Name", dataIndex: "name", key: "name" },
     {
-  title: "Actions",
-  key: "action",
-  width: 120,
-  render: (_: unknown, record: Category) => (
-    <Space size="middle">
-      {parseInt(record.key) <= 4 ? (
-        <span className="text-gray-400">Default</span>
-      ) : (
-        <Button danger size="small" onClick={() => handleDelete(record.key)}>
-          Delete
-        </Button>
-      )}
-    </Space>
-  ),
-},
+      title: "Actions",
+      key: "action",
+      width: 120,
+      render: (_: unknown, record: Category) => (
+        <Space size="middle">
+          {parseInt(record.key) <= 4 ? (
+            <span className="text-gray-400">Default</span>
+          ) : (
+            <Button danger size="small" onClick={() => handleDelete(record.key)}>
+              Delete
+            </Button>
+          )}
+        </Space>
+      ),
+    },
   ];
 
   return (

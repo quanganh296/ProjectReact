@@ -1,5 +1,5 @@
 // src/pages/admin/ManagerPost.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Input,
@@ -53,9 +53,10 @@ const ManagerPost: React.FC = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const saveToLocal = (data: Post[]) => {
-    localStorage.setItem("posts", JSON.stringify(data));
-  };
+  // Đồng bộ posts vào localStorage khi thay đổi
+  useEffect(() => {
+    localStorage.setItem("posts", JSON.stringify(posts));
+  }, [posts]);
 
   const handleAddNew = () => setShowForm(true);
   const handleCancel = () => {
@@ -85,7 +86,6 @@ const ManagerPost: React.FC = () => {
 
     const updated = [...posts, newPost];
     setPosts(updated);
-    saveToLocal(updated);
 
     message.success("✅ Bài viết đã được lưu!");
     handleCancel();
@@ -120,7 +120,15 @@ const ManagerPost: React.FC = () => {
             <div className="grid grid-cols-1 gap-4">
               {posts.map((post) => (
                 <Card key={post.id} title={post.title} className="shadow">
-                  <p><strong>Categories:</strong> {post.categories.join(", ")}</p>
+                  <p>
+                    <strong>Categories:</strong>{" "}
+                    {post.categories
+                      .map((catKey) => {
+                        const cat = categories.find((c) => c.key === catKey);
+                        return cat ? cat.name : catKey;
+                      })
+                      .join(", ")}
+                  </p>
                   <p><strong>Mood:</strong> {post.mood}</p>
                   <p><strong>Status:</strong> {post.status}</p>
                   {post.image && (
