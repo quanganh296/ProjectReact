@@ -46,7 +46,7 @@ const ArticleDetail: React.FC = () => {
         <img
           src={post.image}
           alt={post.title}
-          style={{ width: "100%", borderRadius: 8, marginBottom: 20 }}
+          style={{ width: "50%", borderRadius: 8, marginBottom: 20 }}
         />
 
         <Paragraph style={{ whiteSpace: "pre-line" }}>
