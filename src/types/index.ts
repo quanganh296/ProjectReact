@@ -1,24 +1,23 @@
 // src/types/index.ts
 export interface Comment {
-  id: number;
-  postId: number;
+  id: string;        // ✅ sửa thành string
+  postId: string;    // ✅ sửa thành string
   text: string;
   author: string;
   date: string;
 }
 
 export interface Post {
-  id: number;
+  id: string; // ✅ đổi từ number → string
   title: string;
-  excerpt: string;        // tóm tắt (150 ký tự đầu)
-  content: string;        // nội dung đầy đủ
-  image: string;
-  date: string;
   category: string;
   mood?: string;
+  excerpt: string;
+  content: string;
+  image: string;
+  date: string;
   isMine?: boolean;
   status?: "public" | "private";
-  author?: string;
-  likes: number;
-  comments: Comment[];
+  likes?: number;
+  comments?: Comment[];
 }

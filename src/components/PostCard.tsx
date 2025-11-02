@@ -1,10 +1,10 @@
-// src/components/PostCard.tsx
 import React from "react";
-import { Card, Button } from "antd";
+import { Button, Tag } from "antd";
+import { RightOutlined } from "@ant-design/icons";
 import "../styles/PostCard.css";
 
 export interface PostCardProps {
-  id: number;
+  id: string;
   title: string;
   date: string;
   category: string;
@@ -12,7 +12,7 @@ export interface PostCardProps {
   image: string;
   isMine?: boolean;
   onEdit?: () => void;
-  onTitleClick?: () => void; // ← Click vào tiêu đề / card
+  onTitleClick?: () => void;
   categoryColor?: string;
 }
 
@@ -28,48 +28,34 @@ const PostCard: React.FC<PostCardProps> = ({
   categoryColor,
 }) => {
   return (
-    <Card
-      hoverable
-      cover={<img alt={title} src={image} style={{ height: 240, objectFit: "cover" }} />}
-      onClick={onTitleClick} // ← Click toàn bộ card → vào chi tiết
-      style={{ cursor: onTitleClick ? "pointer" : "default" }}
-    >
-      <div className="post-card-content">
-        {/* Click vào tiêu đề cũng vào chi tiết */}
-        <h3
-          className="post-card-title"
-          style={{ margin: 0, cursor: "pointer" }}
-          onClick={(e) => {
-            e.stopPropagation(); // Ngăn click card
-            onTitleClick?.();
-          }}
-        >
+    <div className="post-item" onClick={onTitleClick}>
+      <img className="post-item-img" src={image} alt={title} />
+      <div className="post-item-content">
+        <p className="post-date">{date}</p>
+        <h3 className="post-title">
           {title}
+          <RightOutlined className="arrow-icon" />
         </h3>
-
-        <p className="post-card-date">{date}</p>
-        <p className="post-card-excerpt">{excerpt}</p>
-
-        <div
-          className="card-footer"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-          onClick={(e) => e.stopPropagation()} // ← Chặn lan tỏa khi bấm Edit
-        >
-          <span className="post-category" style={{ color: categoryColor }}>
+        <p className="post-excerpt">{excerpt}</p>
+        <div className="card-footer">
+          <Tag className="compact-tag" color={categoryColor}>
             {category}
-          </span>
+          </Tag>
           {isMine && onEdit && (
-            <Button type="link" size="small" onClick={onEdit}>
+            <Button
+              type="link"
+              className="Edit"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
               Edit
             </Button>
           )}
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 

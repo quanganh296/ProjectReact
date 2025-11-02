@@ -1,227 +1,165 @@
 // src/pages/user/Home.tsx
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import type { RootState } from "../../redux/store";
-import { Row, Col, Pagination, Button } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Tabs, Pagination, Empty, Tag } from "antd";
 import Header from "../../components/Header";
-import FilterSidebar from "../../components/FilterSidebar";
 import PostCard from "../../components/PostCard";
 import Footer from "../../components/Footer";
+import { useCategories } from "../../context/useCategories";
+import { useAuth } from "../../context/useAuth";
+import type { RootState } from "../../redux/store";
+import { getCategoryColor } from "../../utils/categoryColor";
 import "../../styles/Home.css";
 import "../../styles/PostCard.css";
-import "../../styles/Footer.css";
-import { useAuth } from "../../context/useAuth";
-import { useLocation, useNavigate } from "react-router-dom";
-import { getCategoryColor } from "../../utils/categoryColor";
 
-interface Post {
-  id: number;
-  title: string;
-  date: string;
-  excerpt: string;
-  category: string;
-  image: string;
-  isMine?: boolean;
-  status?: "public" | "private";
-}
+const { TabPane } = Tabs;
 
-const HomePage: React.FC = () => {
+const RECENT_IMAGES = ["/Auth/Image (4).png", "/Auth/Image.png", "/Auth/Image (1).png"];
+
+const MOCK_POSTS = [
+  { id: "1", title: "A Productive Day at Work", excerpt: "Today was a really productive day...", category: "Daily Journal", date: "2025-02-25", image: RECENT_IMAGES[0], isMine: false },
+  { id: "2", title: "My First Job Interview Experience", excerpt: "I had my first job interview today...", category: "Work & Career", date: "2025-02-24", image: RECENT_IMAGES[1], isMine: true },
+  { id: "3", title: "Overthinking Everything", excerpt: "Lately, I have been overthinking...", category: "Personal Thoughts", date: "2025-02-23", image: RECENT_IMAGES[2], isMine: false },
+  { id: "4", title: "How collaboration makes us better designers", excerpt: "Collaboration can make our teams stronger...", category: "Work & Career", date: "2025-02-19", image: "/Auth/Image (6).png", isMine: false },
+  { id: "5", title: "Our top 10 Javascript frameworks to use", excerpt: "JavaScript frameworks make development easy...", category: "Work & Career", date: "2025-02-18", image: "/Auth/Image (1).png", isMine: false },
+  // ... thêm bài
+];
+
+const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
-  const location = useLocation();
-  const posts = useSelector((state: RootState) => state.posts.posts);
+  const posts = useSelector((state: RootState) => state.posts);
+  const { categories } = useCategories();
+  const { isAuthenticated } = useAuth();
 
-  const shouldReset = Boolean(location.state?.resetToAllBlogs);
   const [selectedView, setSelectedView] = useState("All blog posts");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 6;
+  const pageSize = 6;
 
-  React.useEffect(() => {
-    if (shouldReset) {
+  const allPosts = posts.length > 0 ? posts : MOCK_POSTS;
+  const recentPosts = allPosts.slice(0, 3);
+
+  // Lọc theo view
+  const filteredByView = allPosts.filter((post) =>
+    selectedView === "All my posts" ? post.isMine : true
+  );
+
+  // LỌC CHỦ ĐỀ
+  const filteredPosts = filteredByView.filter((post) =>
+    selectedCategory === "All" ? true : post.category === selectedCategory
+  );
+
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedView, selectedCategory]);
+
+  useEffect(() => {
+    if (!isAuthenticated && selectedView === "All my posts") {
       setSelectedView("All blog posts");
-      setSelectedCategory("All");
-      setCurrentPage(1);
-      window.history.replaceState({}, "");
     }
-  }, [shouldReset]);
+  }, [isAuthenticated, selectedView]);
 
-  const filteredPosts = useMemo(() => {
-    let result = posts;
-
-    if (selectedView === "All my posts" && isAuthenticated) {
-      result = result.filter((p: Post) => p.isMine);
-    }
-
-    if (selectedCategory !== "All") {
-      result = result.filter((p: Post) => p.category === selectedCategory);
-    }
-
-    if (!isAuthenticated || !user) {
-      result = result.filter((p: Post) => p.status !== "private");
-    } else {
-      result = result.filter((p: Post) => p.status !== "private" || p.isMine);
-    }
-
-    return result;
-  }, [posts, selectedView, selectedCategory, isAuthenticated, user]);
-
-  const indexOfLastPost = currentPage * postsPerPage;
-  const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
-
-  const handleViewChange = (view: string) => {
-    setSelectedView(view);
-    setCurrentPage(1);
-  };
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    setCurrentPage(1);
-  };
+  const showEdit = selectedView === "All my posts";
 
   return (
-    <>
+    <div className="homepage-container">
       <Header />
-      <div className="homepage-container">
-        {selectedView === "All my posts" ? (
-          <div className="text-center my-8">
-            <Button
-              type="primary"
-              size="large"
-              onClick={() => navigate("/add-article")}
-            >
-              Add New Article
-            </Button>
-          </div>
-        ) : (
-          <h2
-            style={{
-              maxWidth: "1280px",
-              margin: "40px auto 20px",
-              padding: "0 20px",
-            }}
-          >
-            Recent posts
-          </h2>
-        )}
 
-        {currentPosts.length > 0 && (
-          <div
-            className="featured-section"
-            style={{
-              display: "flex",
-              gap: "20px",
-              maxWidth: "1280px",
-              margin: "0 auto",
-            }}
-          >
-            {/* Main Post */}
-            {currentPosts[0] && (
-              <PostCard
-                id={currentPosts[0].id}
-                title={currentPosts[0].title}
-                date={currentPosts[0].date}
-                category={currentPosts[0].category}
-                excerpt={currentPosts[0].excerpt}
-                image={currentPosts[0].image}
-                isMine={currentPosts[0].isMine && selectedView === "All my posts"}
-                onEdit={() =>
-                  navigate(`/add-article/${currentPosts[0].id}`)
-                }
-                onTitleClick={() =>
-                  navigate(`/article/${currentPosts[0].id}`)
-                }
-                categoryColor={getCategoryColor(currentPosts[0].category)}
-              />
-            )}
-
-            {/* Side Posts */}
-            <div className="side-posts-container">
-              {currentPosts.slice(1, 3).map((p) => (
-                <div key={p.id} className="side-post-card">
-                  <img src={p.image} alt={p.title} className="side-post-img" />
-                  <div className="side-post-content">
-                    <h4
-                      className="side-post-title cursor-pointer"
-                      onClick={() => navigate(`/article/${p.id}`)}
-                    >
-                      {p.title}
-                    </h4>
-                    <p className="post-date">{p.date}</p>
-                    <p className="side-post-excerpt">{p.excerpt}</p>
-                    <span
-                      className="post-category"
-                      style={{ color: getCategoryColor(p.category) }}
-                    >
-                      {p.category}
-                    </span>
-                    {p.isMine && selectedView === "All my posts" && (
-                      <Button
-                        type="link"
-                        size="small"
-                        onClick={() => navigate(`/add-article/${p.id}`)}
-                      >
-                        Edit
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
+      {/* === RECENT POSTS === */}
+      <section className="featured-section">
+        {recentPosts[0] && (
+          <div className="main-post" onClick={() => navigate(`/article/${recentPosts[0].id}`)}>
+            <img className="main-post-img" src={recentPosts[0].image} alt={recentPosts[0].title} />
+            <div className="main-post-content">
+              <p className="main-post-date">{recentPosts[0].date}</p>
+              <h3 className="main-post-title">{recentPosts[0].title}</h3>
+              <p className="main-post-excerpt">{recentPosts[0].excerpt}</p>
+              <Tag className="compact-tag-main" color={getCategoryColor(recentPosts[0].category)}>
+                {recentPosts[0].category}
+              </Tag>
             </div>
           </div>
         )}
 
-        <FilterSidebar
-          selectedView={selectedView}
-          selectedCategory={selectedCategory}
-          onViewChange={handleViewChange}
-          onCategoryChange={handleCategoryChange}
-        />
+        <div className="side-posts-container">
+          {recentPosts.slice(1).map((post) => (
+            <div key={post.id} className="side-post-card" onClick={() => navigate(`/article/${post.id}`)}>
+              <img className="side-post-img" src={post.image} alt={post.title} />
+              <div className="side-post-content">
+                <p className="side-post-date">{post.date}</p>
+                <h3 className="side-post-title">{post.title}</h3>
+                <p className="side-post-excerpt">{post.excerpt}</p>
+                <Tag className="compact-tag-side" color={getCategoryColor(post.category)}>
+                  {post.category}
+                </Tag>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-        {/* List posts */}
-        {selectedView !== "All my posts" && (
-          <div className="posts-section-card">
-            <div className="posts-section-inner">
-              <Row gutter={[24, 24]}>
-                {currentPosts.map((p) => (
-                  <Col key={p.id} xs={24} sm={12} lg={8}>
-                    <PostCard
-                      id={p.id}
-                      title={p.title}
-                      date={p.date}
-                      category={p.category}
-                      excerpt={p.excerpt}
-                      image={p.image}
-                      isMine={p.isMine}
-                      onEdit={() => navigate(`/add-article/${p.id}`)}
-                      onTitleClick={() => navigate(`/article/${p.id}`)}
-                      categoryColor={getCategoryColor(p.category)}
-                    />
-                  </Col>
-                ))}
-              </Row>
+      {/* === ALL BLOG POSTS === */}
+      <section className="posts-section-card">
+        <div className="posts-section-inner">
+          <h4>All blog posts</h4>
 
-              {filteredPosts.length > postsPerPage && (
-                <div className="pagination-wrapper">
-                  <Pagination
-                    current={currentPage}
-                    pageSize={postsPerPage}
-                    total={filteredPosts.length}
-                    onChange={(page) => setCurrentPage(page)}
-                    showSizeChanger={false}
-                    showQuickJumper
+          <Tabs activeKey={selectedView} onChange={setSelectedView} className="view-tabs" tabBarGutter={24}>
+            <TabPane tab="All blog posts" key="All blog posts" />
+            {isAuthenticated && <TabPane tab="All my posts" key="All my posts" />}
+          </Tabs>
+
+          <Tabs activeKey={selectedCategory} onChange={setSelectedCategory} className="category-links" tabBarGutter={16}>
+            <TabPane tab="All" key="All" />
+            {categories.map((cat) => (
+              <TabPane tab={cat.name} key={cat.name} />
+            ))}
+          </Tabs>
+
+          {filteredPosts.length === 0 ? (
+            <Empty description="Không có bài viết nào" />
+          ) : (
+            <>
+              <div className="posts-grid">
+                {paginatedPosts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    id={post.id}
+                    title={post.title}
+                    date={post.date}
+                    category={post.category}
+                    excerpt={post.excerpt}
+                    image={post.image} // DÙNG ẢNH CỦA CHÍNH BÀI VIẾT
+                    isMine={post.isMine}
+                    onEdit={showEdit && post.isMine ? () => navigate(`/add-article/${post.id}`) : undefined}
+                    onTitleClick={() => navigate(`/article/${post.id}`)}
+                    categoryColor={getCategoryColor(post.category)}
                   />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+                ))}
+              </div>
+
+              <div className="pagination-wrapper">
+                <Pagination
+                  current={currentPage}
+                  total={filteredPosts.length}
+                  pageSize={pageSize}
+                  onChange={setCurrentPage}
+                  showSizeChanger={false}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </section>
 
       <Footer />
-    </>
+    </div>
   );
 };
 
-export default HomePage;
+export default Home;

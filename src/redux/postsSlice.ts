@@ -1,46 +1,64 @@
-  import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+// src/redux/postsSlice.ts
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Post } from "../types";
+import { v4 as uuidv4 } from "uuid";
 
-interface PostsState {
-  posts: Post[];
-}
-
-const initialState: PostsState = {
-  posts: [
-    {
-      id: 1,
-      title: "Hôm nay là một ngày tuyệt vời",
-      excerpt: "Hôm nay tôi thức dậy sớm, đi dạo công viên và cảm thấy thật bình yên...",
-      content: `Hôm nay tôi thức dậy sớm, đi dạo công viên và cảm thấy thật bình yên. 
-      
-      Mặt trời vừa ló dạng, không khí trong lành, tiếng chim hót líu lo. 
-      Tôi đã uống một ly cà phê nóng và viết vài dòng nhật ký. 
-      
-      Cuộc sống đôi khi chỉ cần những khoảnh khắc nhỏ như vậy để thấy hạnh phúc.`,
-      image: "https://picsum.photos/800/400",
-      date: "2025-10-30",
-      category: "Daily Journal",
-      mood: "happy",
-      isMine: true,
-      status: "public",
-      likes: 15,
-      comments: [
-        { id: 1, postId: 1, text: "Bài viết hay quá!", author: "Lan", date: "2025-10-31" },
-        { id: 2, postId: 1, text: "Mình cũng thích đi dạo sáng", author: "Minh", date: "2025-10-31" }
-      ]
-    }
-  ]
+// === Helper Functions ===
+const savePosts = (posts: Post[]) => {
+  localStorage.setItem("posts_data", JSON.stringify(posts));
 };
 
+const loadPosts = (): Post[] => {
+  const saved = localStorage.getItem("posts_data");
+  return saved ? JSON.parse(saved) : [];
+};
+
+// === Slice ===
 const postsSlice = createSlice({
   name: "posts",
-  initialState,
+  initialState: loadPosts(),
   reducers: {
-    setPosts: (state, action: PayloadAction<Post[]>) => {
-      state.posts = action.payload;
+    // Tạo bài mới
+    addPost: (
+      state,
+      action: PayloadAction<Omit<Post, "id" | "likes" | "comments">>
+    ) => {
+      const newPost: Post = {
+        ...action.payload,
+        id: uuidv4(),
+        likes: 0,
+        comments: [],
+      };
+      state.push(newPost);
+      savePosts(state);
+    },
+
+    // Cập nhật bài
+    updatePost: (state, action: PayloadAction<Post>) => {
+      const index = state.findIndex((p) => p.id === action.payload.id);
+      if (index !== -1) {
+        state[index] = action.payload;
+        savePosts(state);
+      }
+    },
+
+    // Xóa bài
+    deletePost: (state, action: PayloadAction<string>) => {
+      const filtered = state.filter((p) => p.id !== action.payload);
+      savePosts(filtered);
+      return filtered;
+    },
+
+    // Like bài
+    likePost: (state, action: PayloadAction<string>) => {
+      const post = state.find((p) => p.id === action.payload);
+      if (post) {
+        post.likes! += 1;
+        savePosts(state);
+      }
     },
   },
 });
 
-export const { setPosts } = postsSlice.actions;
+export const { addPost, updatePost, deletePost, likePost } = postsSlice.actions;
 export default postsSlice.reducer;

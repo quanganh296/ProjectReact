@@ -19,13 +19,13 @@ import {
 } from "@ant-design/icons";
 import type { RcFile, UploadFile } from "antd/es/upload/interface";
 import AdminLayout from "../../layout/AdminLayout";
-import { useCategories } from "../../context/CategoryContext";
+import { useCategories } from "../../context/useCategories";
 
 const { TextArea } = Input;
 
 interface FormValues {
   title: string;
-  categories: string[];
+  categories: number[]; // ← DÙNG ID (number)
   mood: "Happy" | "Neutral" | "Sad";
   content: string;
   status: "public" | "private";
@@ -34,7 +34,7 @@ interface FormValues {
 interface Post {
   id: number;
   title: string;
-  categories: string[];
+  categories: number[]; // ← DÙNG ID
   mood: "Happy" | "Neutral" | "Sad";
   content: string;
   status: "public" | "private";
@@ -46,14 +46,13 @@ const ManagerPost: React.FC = () => {
   const [form] = Form.useForm<FormValues>();
   const [showForm, setShowForm] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const { categories } = useCategories();
+  const { categories } = useCategories(); // ← { id: number, name: string }
 
   const [posts, setPosts] = useState<Post[]>(() => {
     const saved = localStorage.getItem("posts");
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Đồng bộ posts vào localStorage khi thay đổi
   useEffect(() => {
     localStorage.setItem("posts", JSON.stringify(posts));
   }, [posts]);
@@ -84,10 +83,8 @@ const ManagerPost: React.FC = () => {
       ...values,
     };
 
-    const updated = [...posts, newPost];
-    setPosts(updated);
-
-    message.success("✅ Bài viết đã được lưu!");
+    setPosts((prev) => [...prev, newPost]);
+    message.success("Bài viết đã được lưu!");
     handleCancel();
   };
 
@@ -109,7 +106,9 @@ const ManagerPost: React.FC = () => {
         <>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold text-gray-800">Manage Articles</h2>
-            <Button type="primary" onClick={handleAddNew}>Thêm mới</Button>
+            <Button type="primary" onClick={handleAddNew}>
+              Thêm mới
+            </Button>
           </div>
 
           {posts.length === 0 ? (
@@ -123,16 +122,24 @@ const ManagerPost: React.FC = () => {
                   <p>
                     <strong>Categories:</strong>{" "}
                     {post.categories
-                      .map((catKey) => {
-                        const cat = categories.find((c) => c.key === catKey);
-                        return cat ? cat.name : catKey;
+                      .map((catId) => {
+                        const cat = categories.find((c) => c.id === catId);
+                        return cat ? cat.name : `ID: ${catId}`;
                       })
                       .join(", ")}
                   </p>
-                  <p><strong>Mood:</strong> {post.mood}</p>
-                  <p><strong>Status:</strong> {post.status}</p>
+                  <p>
+                    <strong>Mood:</strong> {post.mood}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {post.status}
+                  </p>
                   {post.image && (
-                    <img src={post.image} alt="" className="w-32 h-32 mt-2 rounded"/>
+                    <img
+                      src={post.image}
+                      alt="Post"
+                      className="w-32 h-32 mt-2 rounded object-cover"
+                    />
                   )}
                 </Card>
               ))}
@@ -141,7 +148,9 @@ const ManagerPost: React.FC = () => {
         </>
       ) : (
         <>
-          <Button onClick={handleCancel} className="mb-4">◀ Quay lại</Button>
+          <Button onClick={handleCancel} className="mb-4">
+            Quay lại
+          </Button>
 
           <Card title="Thêm bài viết mới" className="shadow-sm">
             <Form form={form} layout="vertical" onFinish={handleSubmit} className="max-w-4xl">
@@ -152,7 +161,7 @@ const ManagerPost: React.FC = () => {
               <Form.Item label="Categories" name="categories" rules={[{ required: true }]}>
                 <Select mode="multiple" placeholder="Select categories" allowClear>
                   {categories.map((cat) => (
-                    <Select.Option key={cat.key} value={cat.key}>
+                    <Select.Option key={cat.id} value={cat.id}>
                       {cat.name}
                     </Select.Option>
                   ))}
@@ -162,9 +171,15 @@ const ManagerPost: React.FC = () => {
               <Form.Item label="Mood" name="mood" rules={[{ required: true }]}>
                 <Radio.Group>
                   <Space>
-                    <Radio value="Happy"><SmileOutlined style={{ color: "#fadb14" }} /> Happy</Radio>
-                    <Radio value="Neutral"><MehOutlined style={{ color: "#fa8c16" }} /> Neutral</Radio>
-                    <Radio value="Sad"><FrownOutlined style={{ color: "#ff4d4f" }} /> Sad</Radio>
+                    <Radio value="Happy">
+                      <SmileOutlined style={{ color: "#fadb14" }} /> Happy
+                    </Radio>
+                    <Radio value="Neutral">
+                      <MehOutlined style={{ color: "#fa8c16" }} /> Neutral
+                    </Radio>
+                    <Radio value="Sad">
+                      <FrownOutlined style={{ color: "#ff4d4f" }} /> Sad
+                    </Radio>
                   </Space>
                 </Radio.Group>
               </Form.Item>
