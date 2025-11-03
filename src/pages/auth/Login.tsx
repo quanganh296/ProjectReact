@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Input, Button, Space, Typography, message } from "antd";
+import { Form, Input, Button, Space, Typography, notification } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFacebookF,
@@ -7,6 +7,7 @@ import {
   faTwitter,
   faGoogle,
 } from "@fortawesome/free-brands-svg-icons";
+import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { useAuth } from "../../context/useAuth";
@@ -53,30 +54,61 @@ const Login: React.FC = () => {
   }, []);
 
   const onFinish = (values: { email: string; password: string }) => {
-    const users: StoredUser[] = JSON.parse(localStorage.getItem("users") || "[]");
-
-    const foundUser = users.find((u) => u.email === values.email && u.password === values.password);
-
-    if (!foundUser) {
-      message.error("Email or password is incorrect!");
+    // Check for empty fields (extra validation)
+    if (!values.email || !values.password) {
+      notification.warning({
+        message: "Thiếu thông tin",
+        description: "Vui lòng điền đầy đủ thông tin đăng nhập!",
+        placement: "top",
+        duration: 2,
+      });
       return;
     }
 
-    // ✅ Lưu user login vào Auth Context + localStorage
-    login(foundUser);
-    message.success("Login successful!");
+    const users: StoredUser[] = JSON.parse(localStorage.getItem("users") || "[]");
 
-    // ✅ Điều hướng theo role
-    if (foundUser.role === "admin") {
-      navigate("/admin");
-    } else {
-      navigate("/home");
+    const foundUser = users.find((u) => u.email === values.email);
+
+    if (!foundUser) {
+      notification.error({
+        message: "Đăng nhập thất bại",
+        description: "Email không tồn tại trong hệ thống!",
+        icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
+        placement: "top",
+        duration: 2,
+      });
+      return;
     }
-  };
 
-  const onFinishFailed = (errorInfo: unknown) => {
-    console.log("Login Failed:", errorInfo);
-    message.error("Please check your email and password.");
+    if (foundUser.password !== values.password) {
+      notification.error({
+        message: "Đăng nhập thất bại",
+        description: "Mật khẩu không chính xác!",
+        icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
+        placement: "top",
+        duration: 2,
+      });
+      return;
+    }
+
+    // Login successful
+    login(foundUser);
+    notification.success({
+      message: "Đăng nhập thành công",
+      description: "Chào mừng " + foundUser.name + " quay trở lại!",
+      icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+      placement: "top",
+      duration: 2,
+    });
+
+    // Redirect based on role after a short delay to show notification
+    setTimeout(() => {
+      if (foundUser.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/home");
+      }
+    }, 1000);
   };
 
   return (
@@ -97,27 +129,39 @@ const Login: React.FC = () => {
           form={form}
           name="login"
           onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
+          validateTrigger="onSubmit"
+          validateMessages={{
+            required: "${label} không được để trống!",
+            types: {
+              email: "Định dạng ${label} không hợp lệ!"
+            },
+            string: {
+              min: "${label} phải có ít nhất ${min} ký tự!"
+            }
+          }}
           layout="vertical"
           size="large"
         >
           <Form.Item
-            label="Email address"
+            label="Email"
             name="email"
             rules={[
-              { required: true, message: "Please input your email!" },
-              { type: "email", message: "Please enter a valid email!" },
+              { required: true, message: "Vui lòng nhập email!" },
+              { type: "email", message: "Email không hợp lệ!" },
             ]}
           >
-            <Input placeholder="Enter a valid email address" />
+            <Input placeholder="Nhập email của bạn" />
           </Form.Item>
 
           <Form.Item
-            label="Password"
+            label="Mật khẩu"
             name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập mật khẩu!" },
+              { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" }
+            ]}
           >
-            <Input.Password placeholder="Enter password" />
+            <Input.Password placeholder="Nhập mật khẩu của bạn" />
           </Form.Item>
 
           <Form.Item>
