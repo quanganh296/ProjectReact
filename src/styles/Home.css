@@ -124,3 +124,40 @@
 .add-post-btn:hover {
   background: #125dc2;
 }
+
+/* Page heading alignment for Recent posts */
+.homepage-container h1 {
+  max-width: 1280px;
+  margin: 28px auto 12px;
+  padding: 0 20px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111;
+  text-align: left;
+}
+
+/* Make featured section wrap on small screens */
+.featured-section {
+  max-width: 1280px;
+  margin: 0 auto 32px;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .featured-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .side-posts-container {
+    flex-direction: row;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .side-post-card {
+    width: 100% !important;
+    flex-direction: column !important;
+    height: auto !important;
+  }
+}

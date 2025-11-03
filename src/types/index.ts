@@ -1,21 +1,22 @@
+export interface Post {
+  id: string;
+  title: string;
+  category: number;
+  content: string;
+  excerpt: string;
+  date: string;
+  image?: string;
+  likes: number;       
+  comments: Comment[];  
+  author?: string;
+  comment?: string;
+  isMine?: boolean;
+}
+
 export interface Comment {
   id: string;
   postId: string;
   text: string;
   author: string;
   date: string;
-}
-
-export interface Post {
-  id: string;
-  title: string;
-  category: string;
-  excerpt: string;
-  content: string;
-  image: string;
-  date: string;
-  isMine?: boolean;
-  status?: "public" | "private";
-  likes: number;
-  comments: Comment[];
 }

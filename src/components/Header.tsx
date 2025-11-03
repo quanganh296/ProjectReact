@@ -27,8 +27,8 @@ const Header: React.FC = () => {
     },
     { type: "divider" },
     { key: '2', label: "View profile", onClick: () => navigate("/profile") },
-    { key: '3', label: "Update profile picture" },
-    { key: '4', label: "Change password" },
+    { key: '3', label: "Update profile picture", onClick: () => navigate("/update-profile") },
+    { key: '4', label: "Change password", onClick: () => navigate("/change-password") },
     { type: "divider" },
     {
       key: '5',
@@ -76,7 +76,7 @@ const Header: React.FC = () => {
         ) : (
           <Dropdown menu={{ items }} placement="bottomRight">
             <Avatar
-              src={user?.avatarUrl}
+              src={user?.avatar}
               icon={<UserOutlined />}
               style={{ cursor: "pointer" }}
             />

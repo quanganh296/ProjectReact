@@ -10,6 +10,9 @@ import ArticleDetail from "./pages/user/ArticleDetail";
 import ManagerPost from "./pages/admin/ManagerPost";
 import ManagerUser from "./pages/admin/ManagerUser";
 import Dashboard from "./pages/admin/Dashboard";
+import UserProfile from "./pages/user/UserProfile";
+import UpdateProfile from "./pages/user/UpdateProfile";
+import ChangePassword from "./pages/user/ChangePassword";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "antd/dist/reset.css";
 import "./styles.css";
@@ -42,6 +45,11 @@ const App: React.FC = () => {
             {/* Article Detail */}
             <Route path="/article/:id" element={<ArticleDetail />} />
             <Route path="/article-detail/:id" element={<ArticleDetail />} />
+
+            {/* Profile Routes */}
+            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/update-profile" element={<UpdateProfile />} />
+            <Route path="/change-password" element={<ChangePassword />} />
           </Routes>
         </Router>
       </Provider>

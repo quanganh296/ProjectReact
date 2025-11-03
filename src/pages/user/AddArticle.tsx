@@ -1,3 +1,4 @@
+// src/pages/user/AddArticle.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +15,7 @@ const { TextArea } = Input;
 
 interface FormValues {
   title: string;
-  category: string;
+  category: number; // ← ĐÚNG: id (number)
   content: string;
 }
 
@@ -23,9 +24,7 @@ const AddArticle: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // ✅ posts là mảng Post[]
   const posts = useSelector((state: RootState) => state.posts);
-
   const { categories } = useCategories();
   const { user } = useAuth();
   const [form] = Form.useForm<FormValues>();
@@ -38,7 +37,7 @@ const AddArticle: React.FC = () => {
     if (isEdit && currentPost) {
       form.setFieldsValue({
         title: currentPost.title,
-        category: currentPost.category,
+        category: currentPost.category, // ← number
         content: currentPost.content,
       });
     }
@@ -50,7 +49,6 @@ const AddArticle: React.FC = () => {
       return;
     }
 
-    // ✅ đảm bảo image luôn là string
     let imageBase64: string = currentPost?.image ?? "";
 
     if (imageFile) {
@@ -61,21 +59,26 @@ const AddArticle: React.FC = () => {
       });
     }
 
-    const postData: Omit<Post, "likes" | "comments"> = {
-      id: isEdit ? currentPost!.id : crypto.randomUUID(),
+    const excerpt = values.content.substring(0, 150) + (values.content.length > 150 ? "..." : "");
+    const date = new Date().toISOString().split("T")[0];
+
+    const postData: Omit<Post, "id" | "likes" | "comments"> = {
       title: values.title,
-      category: values.category,
+      category: values.category, // ← number
       content: values.content,
-      date: new Date().toISOString().split("T")[0],
+      excerpt,
+      date,
+      image: imageBase64 || undefined,
+      author: user.name,
       isMine: true,
-      excerpt:
-        values.content.slice(0, 150) +
-        (values.content.length > 150 ? "..." : ""),
-      image: imageBase64 || "/default-img.png", // fallback
     };
 
     if (isEdit) {
-      dispatch(updatePost({ ...currentPost!, ...postData }));
+      const updatedPost: Post = {
+        ...currentPost!,
+        ...postData,
+      };
+      dispatch(updatePost(updatedPost));
       message.success("Cập nhật bài viết thành công!");
     } else {
       dispatch(addPost(postData));
@@ -90,6 +93,8 @@ const AddArticle: React.FC = () => {
       setImageFile(file);
       return false;
     },
+    fileList: imageFile ? [imageFile] : [],
+    maxCount: 1,
   };
 
   return (
@@ -106,7 +111,7 @@ const AddArticle: React.FC = () => {
         <Form.Item name="category" label="Chủ đề" rules={[{ required: true }]}>
           <Select size="large" placeholder="Chọn chủ đề">
             {categories.map((c) => (
-              <Select.Option key={c.id} value={c.name}>
+              <Select.Option key={c.id} value={c.id}>
                 {c.name}
               </Select.Option>
             ))}
@@ -118,7 +123,7 @@ const AddArticle: React.FC = () => {
         </Form.Item>
 
         <Form.Item label="Ảnh bài viết">
-          <Upload {...uploadProps} maxCount={1}>
+          <Upload {...uploadProps}>
             <Button icon={<UploadOutlined />}>Chọn ảnh...</Button>
           </Upload>
         </Form.Item>

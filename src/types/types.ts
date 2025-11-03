@@ -12,7 +12,7 @@ export interface Post {
   id: string;
   title: string;
   content: string;
-  category: string;
+  category: number;
   date: string;
   likes: number;
   comments: Comment[];

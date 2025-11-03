@@ -10,8 +10,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const saved = localStorage.getItem("auth");
     if (saved) {
       try {
-        setUser(JSON.parse(saved) as User);
-      } catch {
+        const parsed = JSON.parse(saved);
+        setUser(parsed);
+      } catch (e) {
+        console.error("Failed to parse auth from localStorage", e);
         localStorage.removeItem("auth");
       }
     }
@@ -27,6 +29,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem("auth");
   };
 
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem("auth", JSON.stringify(updatedUser));
+  };
+
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    if (!user) throw new Error("No user logged in");
+
+    // Get stored password from localStorage
+    const stored = localStorage.getItem("auth");
+    if (!stored) throw new Error("No stored credentials");
+
+    const storedUser = JSON.parse(stored);
+    
+    // Verify current password
+    if (storedUser.password !== currentPassword) {
+      throw new Error("Current password is incorrect");
+    }
+
+    // Update password
+    const updatedUser = { ...user, password: newPassword };
+    setUser(updatedUser);
+    localStorage.setItem("auth", JSON.stringify(updatedUser));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -34,6 +61,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isAuthenticated: !!user,
         login,
         logout,
+        updateUser,
+        changePassword,
       }}
     >
       {children}

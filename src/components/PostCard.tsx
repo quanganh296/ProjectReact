@@ -1,10 +1,11 @@
+// src/components/PostCard.tsx
 import React from "react";
-import { Button, Tag } from "antd";
-import { RightOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Card, Tag, Space } from "antd";
 import "../styles/PostCard.css";
 
 export interface PostCardProps {
-  id: string;
+  // XÓA id vì không dùng trong component
   title: string;
   date: string;
   category: string;
@@ -12,8 +13,8 @@ export interface PostCardProps {
   image: string;
   isMine?: boolean;
   onEdit?: () => void;
-  onTitleClick?: () => void;
-  categoryColor?: string;
+  onTitleClick: () => void;
+  categoryColor: string;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -28,34 +29,43 @@ const PostCard: React.FC<PostCardProps> = ({
   categoryColor,
 }) => {
   return (
-    <div className="post-item" onClick={onTitleClick}>
-      <img className="post-item-img" src={image} alt={title} />
-      <div className="post-item-content">
-        <p className="post-date">{date}</p>
-        <h3 className="post-title">
-          {title}
-          <RightOutlined className="arrow-icon" />
-        </h3>
-        <p className="post-excerpt">{excerpt}</p>
-        <div className="card-footer">
-          <Tag className="compact-tag" color={categoryColor}>
-            {category}
-          </Tag>
-          {isMine && onEdit && (
-            <Button
-              type="link"
-              className="Edit"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-            >
-              Edit
-            </Button>
-          )}
-        </div>
+    <Card
+      className="post-card"
+      hoverable
+      cover={
+        <img
+          alt={title}
+          src={image}
+          className="post-card-img"
+          onClick={onTitleClick}
+        />
+      }
+      actions={
+        isMine
+          ? [
+              <EditOutlined key="edit" onClick={onEdit} />,
+              <DeleteOutlined key="delete" />,
+            ]
+          : undefined
+      }
+    >
+      <div onClick={onTitleClick} style={{ cursor: "pointer" }}>
+        <Card.Meta
+          title={
+            <Space>
+              <span>{title}</span>
+              <Tag color={categoryColor}>{category}</Tag>
+            </Space>
+          }
+          description={
+            <>
+              <p className="post-card-date">{date}</p>
+              <p className="post-card-excerpt">{excerpt}</p>
+            </>
+          }
+        />
       </div>
-    </div>
+    </Card>
   );
 };
 
