@@ -2,6 +2,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Post, Comment } from "../types";
 import { v4 as uuidv4 } from "uuid";
+import { DEFAULT_POSTS } from "../constants/defaultPosts";
 
 const STORAGE_KEY = "posts_data";
 
@@ -57,6 +58,17 @@ const postsSlice = createSlice({
       if (post) {
         post.likes = (post.likes ?? 0) + 1;
         savePosts(state);
+      } else {
+        // If the post is not in the Redux store, it might be a default post
+        // We need to add it to the store first
+        const defaultPost = DEFAULT_POSTS.find(p => p.id === action.payload);
+        if (defaultPost) {
+          state.push({
+            ...defaultPost,
+            likes: (defaultPost.likes ?? 0) + 1
+          });
+          savePosts(state);
+        }
       }
     },
 
@@ -65,8 +77,17 @@ const postsSlice = createSlice({
       action: PayloadAction<{ postId: string; text: string; author: string }>
     ) => {
       const { postId, text, author } = action.payload;
-      const post = state.find((p) => p.id === postId);
-      if (!post) return;
+      let post = state.find((p) => p.id === postId);
+
+      if (!post) {
+        // If the post is not in the Redux store, it might be a default post
+        const defaultPost = DEFAULT_POSTS.find((p) => p.id === postId);
+        if (!defaultPost) return;
+        // Add a copy of the default post into the store
+        const copy = { ...defaultPost } as Post;
+        state.push(copy);
+        post = copy;
+      }
 
       const newComment: Comment = {
         id: uuidv4(),
@@ -76,7 +97,8 @@ const postsSlice = createSlice({
         date: new Date().toISOString(),
       };
 
-      post.comments = [...(post.comments ?? []), newComment];
+      if (!post.comments) post.comments = [];
+      post.comments.push(newComment);
       savePosts(state);
     },
   },

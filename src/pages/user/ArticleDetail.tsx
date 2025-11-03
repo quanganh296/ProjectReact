@@ -9,6 +9,7 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import type { Post, Comment } from "../../types";
 import { useAuth } from "../../context/useAuth";
+import { DEFAULT_POSTS } from "../../constants/defaultPosts";
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -19,7 +20,8 @@ const ArticleDetail: React.FC = () => {
   const dispatch = useDispatch();
 
   const posts = useSelector((state: RootState) => state.posts);
-  const post = posts.find((p: Post) => p.id === id);
+  // First try to find the post in the Redux store, if not found, look in default posts
+  const post = posts.find((p: Post) => p.id === id) || DEFAULT_POSTS.find(p => p.id === id);
 
   const { user } = useAuth();
 

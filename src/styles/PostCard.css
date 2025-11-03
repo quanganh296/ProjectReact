@@ -48,6 +48,31 @@
 }
 
 .main-post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.post-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.post-stats .anticon {
+  font-size: 16px;
+  color: #666;
+  margin-right: 4px;
+}
+
+.ant-card-actions > li {
+  margin: 0 !important;
+}
+
+.ant-card-actions .ant-space {
+  color: #666;
   flex-direction: column !important;
 }
 

@@ -1,7 +1,8 @@
 // src/pages/user/Home.tsx
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tabs, Pagination, Empty, Tag } from "antd";
+import { Tabs, Pagination, Empty, Tag, Space } from "antd";
+import { LikeOutlined, CommentOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../redux/store";
 import Header from "../../components/Header";
@@ -24,6 +25,11 @@ const DEFAULT_RECENT = [
     category: 1,
     date: "2025-02-25",
     image: "/Auth/Image (4).png",
+    likes: 15,
+    comments: [
+      { id: "c1", text: "Great job! Keep up the good work!", author: "John", date: "2025-02-25" },
+      { id: "c2", text: "That's impressive! What strategies did you use?", author: "Sarah", date: "2025-02-25" }
+    ],
   },
   {
     id: "2",
@@ -33,6 +39,11 @@ const DEFAULT_RECENT = [
     category: 2,
     date: "2025-02-24",
     image: "/Auth/Image.png",
+    likes: 23,
+    comments: [
+      { id: "c3", text: "We've all been there! Hope you get the job!", author: "Mike", date: "2025-02-24" },
+      { id: "c4", text: "Interviews get easier with practice. You did great!", author: "Emma", date: "2025-02-24" }
+    ],
   },
   {
     id: "3",
@@ -42,6 +53,11 @@ const DEFAULT_RECENT = [
     category: 3,
     date: "2025-02-23",
     image: "/Auth/Image (1).png",
+    likes: 45,
+    comments: [
+      { id: "c5", text: "I can totally relate to this. Take it one day at a time!", author: "Lisa", date: "2025-02-23" },
+      { id: "c6", text: "Try meditation, it helps with overthinking.", author: "David", date: "2025-02-23" }
+    ],
   },
 ];
 
@@ -53,6 +69,11 @@ const DEFAULT_ALL = [
     category: 2,
     date: "2025-02-16",
     image: "/Auth/Image (6).png",
+    likes: 67,
+    comments: [
+      { id: "c7", text: "This really resonates with our team's experience!", author: "Alex", date: "2025-02-16" },
+      { id: "c8", text: "Great insights on team collaboration!", author: "Maria", date: "2025-02-16" }
+    ],
   },
   {
     id: "5",
@@ -61,6 +82,11 @@ const DEFAULT_ALL = [
     category: 2,
     date: "2025-02-15",
     image: "/Auth/Image (1).png",
+    likes: 89,
+    comments: [
+      { id: "c9", text: "React is definitely my favorite!", author: "James", date: "2025-02-15" },
+      { id: "c10", text: "Would love to see a comparison between Vue and React", author: "Anna", date: "2025-02-15" }
+    ],
   },
   {
     id: "6",
@@ -69,6 +95,11 @@ const DEFAULT_ALL = [
     category: 4,
     date: "2025-02-05",
     image: "/Auth/Image (2).png",
+    likes: 34,
+    comments: [
+      { id: "c11", text: "This podcast was super helpful for our startup!", author: "Thomas", date: "2025-02-05" },
+      { id: "c12", text: "Great tips for community building!", author: "Sophie", date: "2025-02-05" }
+    ],
   },
   {
     id: "1",
@@ -78,6 +109,11 @@ const DEFAULT_ALL = [
     category: 1,
     date: "2025-02-25",
     image: "/Auth/Image (3).png",
+    likes: 15,
+    comments: [
+      { id: "c1", text: "Great job! Keep up the good work!", author: "John", date: "2025-02-25" },
+      { id: "c2", text: "That's impressive! What strategies did you use?", author: "Sarah", date: "2025-02-25" }
+    ],
   },
   {
     id: "2",
@@ -87,6 +123,11 @@ const DEFAULT_ALL = [
     category: 2,
     date: "2025-02-24",
     image: "/Auth/Image (4).png",
+    likes: 23,
+    comments: [
+      { id: "c3", text: "We've all been there! Hope you get the job!", author: "Mike", date: "2025-02-24" },
+      { id: "c4", text: "Interviews get easier with practice. You did great!", author: "Emma", date: "2025-02-24" }
+    ],
   },
   {
     id: "3",
@@ -96,6 +137,11 @@ const DEFAULT_ALL = [
     category: 3,
     date: "2025-02-23",
     image: "/Auth/Image (5).png",
+    likes: 45,
+    comments: [
+      { id: "c5", text: "I can totally relate to this. Take it one day at a time!", author: "Lisa", date: "2025-02-23" },
+      { id: "c6", text: "Try meditation, it helps with overthinking.", author: "David", date: "2025-02-23" }
+    ],
   },
 ];
 
@@ -123,6 +169,13 @@ const Home: React.FC = () => {
     content?: string;
     author?: string;
     isMine?: boolean;
+    likes?: number;
+    comments?: Array<{
+      id: string;
+      text: string;
+      author: string;
+      date: string;
+    }>;
   };
   const reduxNormalized: UIShapedPost[] = useMemo(
     () =>
@@ -136,6 +189,8 @@ const Home: React.FC = () => {
         content: p.content,
         author: p.author,
         isMine: p.isMine,
+        likes: p.likes ?? 0,
+        comments: p.comments ?? [],
       })),
     [allPosts]
   );
@@ -254,12 +309,18 @@ const Home: React.FC = () => {
                   <p className="main-post-date">{recentPosts[0].date}</p>
                   <h3 className="main-post-title">{recentPosts[0].title}</h3>
                   <p className="main-post-excerpt">{recentPosts[0].excerpt}</p>
-                  <Tag
-                    className="compact-tag-main"
-                    color={getCategoryColor(getCategoryName(recentPosts[0].category))}
-                  >
-                    {getCategoryName(recentPosts[0].category)}
-                  </Tag>
+                  <Space className="main-post-footer">
+                    <Tag
+                      className="compact-tag-main"
+                      color={getCategoryColor(getCategoryName(recentPosts[0].category))}
+                    >
+                      {getCategoryName(recentPosts[0].category)}
+                    </Tag>
+                    <Space>
+                      <LikeOutlined /> {recentPosts[0].likes || 0}
+                      <CommentOutlined /> {recentPosts[0].comments?.length || 0}
+                    </Space>
+                  </Space>
                 </div>
               </div>
             )}
@@ -276,12 +337,20 @@ const Home: React.FC = () => {
                     <p className="side-post-date">{post.date}</p>
                     <h3 className="side-post-title">{post.title}</h3>
                     <p className="side-post-excerpt">{post.excerpt}</p>
-                    <Tag
-                      className="compact-tag-side"
-                      color={getCategoryColor(getCategoryName(post.category))}
-                    >
-                      {getCategoryName(post.category)}
-                    </Tag>
+                    <div className="post-stats">
+                      <Space>
+                        <Tag
+                          className="compact-tag-side"
+                          color={getCategoryColor(getCategoryName(post.category))}
+                        >
+                          {getCategoryName(post.category)}
+                        </Tag>
+                        <Space>
+                          <LikeOutlined /> {post.likes || 0}
+                          <CommentOutlined /> {post.comments?.length || 0}
+                        </Space>
+                      </Space>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -318,16 +387,18 @@ const Home: React.FC = () => {
                   const categoryName = getCategoryName(post.category);
                   return (
                     <div key={post.id} className="post-item">
-                      <PostCard
+                    <PostCard
                         title={post.title}
                         date={post.date}
                         category={categoryName}
                         excerpt={post.excerpt}
                         image={post.image ?? ""}
                         isMine={post.author === user?.name}
-                        onTitleClick={() => navigate(`/article/${post.id}`)}
                         onEdit={() => navigate(`/add-article/${post.id}`)}
+                        onTitleClick={() => navigate(`/article/${post.id}`)}
                         categoryColor={getCategoryColor(categoryName)}
+                        likes={post.likes}
+                        comments={post.comments}
                       />
                     </div>
                   );

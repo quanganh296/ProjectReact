@@ -1,10 +1,10 @@
 /* src/styles/Header.css */
 .blog-header {
-  display: flex;
+  display: grid;
   max-width: 1920px;
-  flex-direction: row;
+  grid-template-columns: auto 1080px auto;
   align-items: center;
-  justify-content: space-between;
+  gap: 40px;
   position: relative;
   margin-top: 1px;
   margin-bottom: 0px;
@@ -19,6 +19,7 @@
   align-items: center;
   font-size: 18px;
   color: rgb(37, 44, 50);
+  margin-right: auto;
 }
 
 .admin-avatar {
@@ -26,7 +27,7 @@
   justify-content: flex-end;
   align-items: flex-end;
   padding: 24px;
-  border-bottom: 1px solid #7b777794 ;
+  border-bottom: 1px solid #7b777794;
 }
 
 .Logo {
@@ -35,10 +36,11 @@
 }
 
 .search-input {
-  width: 920px;
+  width: 1080px;
   height: 40px;
   border-radius: 8px;
   transition: all 0.3s ease;
+  margin: 0 auto;
 }
 
 .search-input:hover,
@@ -48,13 +50,23 @@
 }
 
 /* Responsive */
-@media (max-width: 992px) {
+@media (max-width: 1400px) {
   .blog-header {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     padding: 16px;
     gap: 16px;
   }
+  
+  .header-title {
+    justify-content: center;
+  }
+  
   .search-input {
     width: 100%;
+    max-width: 1080px;
+  }
+  
+  .blog-header > :last-child {
+    justify-content: center;
   }
 }

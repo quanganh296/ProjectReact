@@ -1,7 +1,7 @@
 // src/components/PostCard.tsx
 import React from "react";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Card, Tag, Space } from "antd";
+import { EditOutlined, DeleteOutlined, LikeOutlined, CommentOutlined } from "@ant-design/icons";
+import { Card, Tag, Space, Tooltip } from "antd";
 import "../styles/PostCard.css";
 
 export interface PostCardProps {
@@ -15,6 +15,13 @@ export interface PostCardProps {
   onEdit?: () => void;
   onTitleClick: () => void;
   categoryColor: string;
+  likes?: number;
+  comments?: Array<{
+    id: string;
+    text: string;
+    author: string;
+    date: string;
+  }>;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -27,6 +34,8 @@ const PostCard: React.FC<PostCardProps> = ({
   onEdit,
   onTitleClick,
   categoryColor,
+  likes = 0,
+  comments = [],
 }) => {
   return (
     <Card
@@ -40,14 +49,24 @@ const PostCard: React.FC<PostCardProps> = ({
           onClick={onTitleClick}
         />
       }
-      actions={
-        isMine
+      actions={[
+        <Tooltip title={`${likes} likes`} key="like">
+          <Space>
+            <LikeOutlined /> {likes}
+          </Space>
+        </Tooltip>,
+        <Tooltip title={`${comments.length} comments`} key="comment">
+          <Space>
+            <CommentOutlined /> {comments.length}
+          </Space>
+        </Tooltip>,
+        ...(isMine
           ? [
               <EditOutlined key="edit" onClick={onEdit} />,
               <DeleteOutlined key="delete" />,
             ]
-          : undefined
-      }
+          : []),
+      ]}
     >
       <div onClick={onTitleClick} style={{ cursor: "pointer" }}>
         <Card.Meta
