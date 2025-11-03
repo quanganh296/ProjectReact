@@ -39,7 +39,6 @@ const Dashboard: React.FC = () => {
   const [newCategory, setNewCategory] = useState("");
   const [searchText, setSearchText] = useState("");
 
-  // Load custom categories từ localStorage (1 lần)
   // Load custom categories from localStorage once on mount
   useEffect(() => {
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -59,9 +58,9 @@ const Dashboard: React.FC = () => {
         console.error("Parse localStorage error:", e);
       }
     }
-  }, [dispatch]);
+  }, [dispatch, reduxCategories]);
 
-  // Đồng bộ Redux → localStorage
+  // Sync Redux categories to localStorage whenever they change
   useEffect(() => {
     const custom = reduxCategories.filter((c) => c.id > 4);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(custom));

@@ -10,7 +10,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { useAuth } from "../../context/useAuth";
-import { type User } from "../../context/AuthContext"; // Import User type
+import type { User } from "../../types/types";
+
+// Local stored user shape (includes password for local auth storage)
+type StoredUser = User & { password?: string };
 
 const { Text, Link } = Typography;
 
@@ -24,8 +27,10 @@ const Login: React.FC = () => {
     const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
 
     if (existingUsers.length === 0) {
-      const defaultUsers: User[] = [
+      const defaultUsers: StoredUser[] = [
         {
+          id: "1",
+          username: "admin",
           name: "Admin",
           email: "admin@gmail.com",
           avatar: "https://via.placeholder.com/40",
@@ -33,6 +38,8 @@ const Login: React.FC = () => {
           password: "admin123",
         },
         {
+          id: "2",
+          username: "quanganh",
           name: "Nguyen Quang Anh",
           email: "user@gmail.com",
           avatar: "https://via.placeholder.com/40",
@@ -46,11 +53,9 @@ const Login: React.FC = () => {
   }, []);
 
   const onFinish = (values: { email: string; password: string }) => {
-    const users: User[] = JSON.parse(localStorage.getItem("users") || "[]");
+    const users: StoredUser[] = JSON.parse(localStorage.getItem("users") || "[]");
 
-    const foundUser = users.find(
-      (u) => u.email === values.email && u.password === values.password
-    );
+    const foundUser = users.find((u) => u.email === values.email && u.password === values.password);
 
     if (!foundUser) {
       message.error("Email or password is incorrect!");
