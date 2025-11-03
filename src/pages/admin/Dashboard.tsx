@@ -25,7 +25,7 @@ import { useCategories } from "../../context/useCategories";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../redux/store";
 import type { Category } from "../../redux/categoriesSlice";
-import { addCategory as reduxAdd, deleteCategory as reduxDelete } from "../../redux/categoriesSlice";
+import { addCategory as reduxAdd } from "../../redux/categoriesSlice";
 
 const { Title } = Typography;
 const LOCAL_STORAGE_KEY = "customBlogCategories";
@@ -40,6 +40,7 @@ const Dashboard: React.FC = () => {
   const [searchText, setSearchText] = useState("");
 
   // Load custom categories từ localStorage (1 lần)
+  // Load custom categories from localStorage once on mount
   useEffect(() => {
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (stored) {
@@ -49,6 +50,7 @@ const Dashboard: React.FC = () => {
           const missing = parsed.filter(
             (cat) => !reduxCategories.some((c) => c.id === cat.id)
           );
+          // Only add missing categories on initial mount to restore previous custom categories
           missing.forEach((cat) => {
             dispatch(reduxAdd(cat.name));
           });
@@ -57,7 +59,7 @@ const Dashboard: React.FC = () => {
         console.error("Parse localStorage error:", e);
       }
     }
-  }, [dispatch, reduxCategories]);
+  }, [dispatch]);
 
   // Đồng bộ Redux → localStorage
   useEffect(() => {
@@ -76,11 +78,8 @@ const Dashboard: React.FC = () => {
       return message.error("Chủ đề đã tồn tại!");
     }
 
-    // Redux lưu string (tên category)
-    dispatch(reduxAdd(trimmed));
-
-    // Context cũng nhận string
-    addCategory(trimmed);
+  // Add via context (which dispatches to Redux)
+  addCategory(trimmed);
 
     setNewCategory("");
     message.success("Thêm chủ đề thành công!");
@@ -93,11 +92,8 @@ const Dashboard: React.FC = () => {
     const category = allCategories.find((c) => c.id === id);
     if (!category) return;
 
-    // Redux xóa theo id
-    dispatch(reduxDelete(id));
-
-    // Context xóa theo id
-    deleteCategory(id);
+  // Delete via context (which dispatches to Redux)
+  deleteCategory(id);
 
     message.success("Xóa chủ đề thành công!");
   };

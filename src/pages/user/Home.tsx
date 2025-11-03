@@ -224,9 +224,13 @@ const Home: React.FC = () => {
       <Header />
 
       {/* Banner: My Posts */}
-      {isAuthenticated && selectedView === "All my posts" && filteredPosts.length === 0 && (
+      {isAuthenticated && selectedView === "All my posts" && (
         <div className="add-post-banner">
-          <h2>You haven't written any blog posts yet!</h2>
+          {filteredPosts.length === 0 ? (
+            <h2>You haven't written any blog posts yet!</h2>
+          ) : (
+            <h2>Manage your blog posts</h2>
+          )}
           <button className="add-post-btn" onClick={() => navigate("/add-article")}>
             Add new post
           </button>
