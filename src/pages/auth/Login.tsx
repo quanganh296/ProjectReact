@@ -28,14 +28,14 @@ const Login: React.FC = () => {
         {
           name: "Admin",
           email: "admin@gmail.com",
-          avatarUrl: "https://via.placeholder.com/40",
+          avatar: "https://via.placeholder.com/40",
           role: "admin",
           password: "admin123",
         },
         {
           name: "Nguyen Quang Anh",
           email: "user@gmail.com",
-          avatarUrl: "https://via.placeholder.com/40",
+          avatar: "https://via.placeholder.com/40",
           role: "user",
           password: "123456",
         },

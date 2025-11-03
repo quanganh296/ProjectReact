@@ -30,7 +30,7 @@ const Signup: React.FC = () => {
     email: string;
     password: string;
     role: string;
-    avatarUrl: string;
+    avatar?: string;
   }
 
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +79,7 @@ const Signup: React.FC = () => {
       email,
       password,
       role: "user",
-      avatarUrl: "https://via.placeholder.com/40"
+      avatar: "https://via.placeholder.com/40"
     };
 
     // ✅ Save to localStorage
