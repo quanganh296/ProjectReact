@@ -38,7 +38,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
 
-            {/* Add & Edit Article - DÙNG CÙNG 1 COMPONENT */}
+            {/* Add & Edit Article */}
             <Route path="/add-article" element={<AddArticle />} />
             <Route path="/add-article/:id" element={<AddArticle />} />
 

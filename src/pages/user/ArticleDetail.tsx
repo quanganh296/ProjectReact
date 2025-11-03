@@ -1,4 +1,3 @@
-// src/pages/user/ArticleDetail.tsx
 import React, { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";

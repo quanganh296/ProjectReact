@@ -12,6 +12,7 @@ interface SignupFormType {
   email: string;
   password: string;
   confirmPassword: string;
+  status: string;
 }
 
 const Signup: React.FC = () => {
@@ -25,6 +26,7 @@ const Signup: React.FC = () => {
     password: string;
     role: string;
     avatar?: string;
+    status: string;
   }
 
   // Handle form submission
@@ -41,7 +43,8 @@ const Signup: React.FC = () => {
       email,
       password,
       role: "user",
-      avatar: "https://via.placeholder.com/40"
+      avatar: "https://via.placeholder.com/40",
+      status: "active", 
     };
 
     // Save to localStorage

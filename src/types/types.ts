@@ -6,6 +6,7 @@ export interface User {
   role: "user" | "admin";
   avatar?: string;
   username:string;
+  status: string;
 }
 
 export interface Post {

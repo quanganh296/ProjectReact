@@ -114,6 +114,7 @@ const ManagerUser: React.FC = () => {
             danger 
             onClick={() => handleBlock(record.id)}
             disabled={record.status === "blocked"}
+            
           >
             Block
           </Button>
